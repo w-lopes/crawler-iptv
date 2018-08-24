@@ -5,7 +5,7 @@ import inspect
 import os
 import re
 import requests
-import shutil
+import sys
 import threading
 import validators
 
@@ -162,12 +162,11 @@ if __name__ == "__main__":
 		try:
 			global_lock = threading.Lock()
 			links       = Crawler()
-			all         = []
-			all         = ["https://bit.ly/faustinotv"]
 			threads     = []
 			now         = datetime.datetime.now()
 			dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
 			path        = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+			all         = ["https://bit.ly/faustinotv"]
 
 			links.clearFile()
 
@@ -191,11 +190,12 @@ if __name__ == "__main__":
 			for t in threads:
 				t.join()
 
-			shutil.copyfile(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
+			os.rename(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
 			print("Done")
-
 		except (KeyboardInterrupt, SystemExit):
-			shutil.copyfile(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
+			os.rename(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
 			print("Exiting")
-		except:
+			sys.exit(0)
+		except Exception as e:
+			print("Exception", e)
 			pass
