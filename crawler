@@ -134,7 +134,7 @@ class Crawler:
 
 		global_lock.acquire()
 
-		with open(os.path.join(path, self.file_name_m3u_tmp).encode("ascii"), "a+") as file:
+		with open(os.path.join(path, self.file_name_m3u_tmp).encode('utf-8').strip(), "a+") as file:
 			file.write(line)
 			file.close()
 
