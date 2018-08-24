@@ -5,6 +5,7 @@ import inspect
 import os
 import re
 import requests
+import shutil
 import threading
 import validators
 
@@ -27,7 +28,7 @@ class Crawler:
 		Returns:
 			str[]: Links coletados do site
 		"""
-		content = self._getLinkLines("https://listasiptvgratis.com/").split("\n")
+		content = self._getLinkLines("https://listasiptvgratis.com/", True)
 		links   = []
 		valids  = [i for j in (range(21, 31), range(84, 94)) for i in j]
 		counter = 0
@@ -41,7 +42,7 @@ class Crawler:
 		return links
 
 
-	def _getLinkLines(self, link):
+	def _getLinkLines(self, link, split=False):
 		"""
 		Retorna o conteudo de uma link splitado por quebra de linha.
 
@@ -56,7 +57,10 @@ class Crawler:
 		}
 		try:
 			response = requests.get(link, headers=headers, timeout=5)
-			return re.sub("\r", "", response.text)
+			if split:
+				return re.sub("\r", "", response.text).split("\n")
+			else:
+				return re.sub("\r", "", response.text)
 		except:
 			return []
 
@@ -67,12 +71,7 @@ class Crawler:
 
 	def _threadParseList(self, link):
 		print("Downloading list:", link)
-		lines    = self._getLinkLines(link)
-
-		# if (len(lines) > 10000):
-		# 	print("TOO LONG! Skipping list", link, "with", len(lines), "lines!")
-		# 	return
-
+		lines = self._getLinkLines(link)
 		re.sub("(#EXTINF.*\n)(http.*\n)", self._regExCallback, lines)
 
 	def clearFile(self):
@@ -154,6 +153,7 @@ class Crawler:
 		)
 		return self.appendLine(line)
 
+
 if __name__ == "__main__":
 	global_lock = threading.Lock()
 	links       = Crawler()
@@ -162,6 +162,7 @@ if __name__ == "__main__":
 	threads     = []
 	now         = datetime.datetime.now()
 	dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
+	path        = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
 
 	links.clearFile()
 
@@ -169,10 +170,10 @@ if __name__ == "__main__":
 	links.appendLine("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"")
 	links.appendLine("#EXTINF:-1 tvg-id="" group-title=\"Info\", Atualizada em: " + dthr)
 
-	# for i in links.links:
-	# 	print("Collecting from", i)
-	# 	crawl = getattr(links, i)
-	# 	all  += crawl()
+	for i in links.links:
+		print("Collecting from", i)
+		crawl = getattr(links, i)
+		all  += crawl()
 
 	all = list(set(all))
 
@@ -185,4 +186,5 @@ if __name__ == "__main__":
 	for t in threads:
 		t.join()
 
+	shutil.copyfile(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
 	print("Done")
