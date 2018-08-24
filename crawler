@@ -104,7 +104,7 @@ class Crawler:
 			return
 
 		try:
-			req    = requests.get(url, timeout=3)
+			req    = requests.get(url, headers=headers, timeout=3)
 			status = req.status_code
 		except:
 			print("\t[OFF] (Timeout)", name)
