@@ -5,6 +5,7 @@ import os
 import re
 import requests
 import threading
+import unidecode
 import validators
 
 class Crawler:
@@ -134,8 +135,8 @@ class Crawler:
 
 		global_lock.acquire()
 
-		with open(os.path.join(path, self.file_name_m3u_tmp), "a+") as file:
-			file.write(str(line.decode("utf-8")))
+		with open(unidecode.unidecode(os.path.join(path, self.file_name_m3u_tmp)), "a+") as file:
+			file.write(unidecode.unidecode(line))
 			file.close()
 
 		global_lock.release()
