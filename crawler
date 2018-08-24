@@ -156,38 +156,46 @@ class Crawler:
 
 if __name__ == "__main__":
 
+
 	while True:
 
-		global_lock = threading.Lock()
-		links       = Crawler()
-		all         = []
-		all         = ["https://bit.ly/faustinotv"]
-		threads     = []
-		now         = datetime.datetime.now()
-		dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
-		path        = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+		try:
+			global_lock = threading.Lock()
+			links       = Crawler()
+			all         = []
+			all         = ["https://bit.ly/faustinotv"]
+			threads     = []
+			now         = datetime.datetime.now()
+			dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
+			path        = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
 
-		links.clearFile()
+			links.clearFile()
 
-		links.appendLine("#EXTM3U")
-		links.appendLine("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"")
-		links.appendLine("#EXTINF:-1 tvg-id="" group-title=\"Info\", Atualizada em: " + dthr)
+			links.appendLine("#EXTM3U")
+			links.appendLine("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"")
+			links.appendLine("#EXTINF:-1 tvg-id="" group-title=\"Info\", Atualizada em: " + dthr)
 
-		for i in links.links:
-			print("Collecting from", i)
-			crawl = getattr(links, i)
-			all  += crawl()
+			for i in links.links:
+				print("Collecting from", i)
+				crawl = getattr(links, i)
+				all  += crawl()
 
-		all = list(set(all))
+			all = list(set(all))
 
-		for link in all:
-			links.appendLine("#EXTINF:-1 tvg-id="" group-title=\"Info\", Fonte: " + link)
-			t = threading.Thread(target=links._threadParseList, args=(link,))
-			t.start()
-			threads.append(t)
+			for link in all:
+				links.appendLine("#EXTINF:-1 tvg-id="" group-title=\"Info\", Fonte: " + link)
+				t = threading.Thread(target=links._threadParseList, args=(link,))
+				t.start()
+				threads.append(t)
 
-		for t in threads:
-			t.join()
+			for t in threads:
+				t.join()
 
-		shutil.copyfile(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
-		print("Done")
+			shutil.copyfile(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
+			print("Done")
+
+		except (KeyboardInterrupt, SystemExit):
+			shutil.copyfile(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
+			print("Exiting")
+		except:
+			pass
