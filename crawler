@@ -1,0 +1,187 @@
+#!/usr/bin/env python3
+import datetime
+import inspect
+import os
+import re
+import requests
+import threading
+import validators
+
+class Crawler:
+	"""
+	Classe para 'crawlear' os sites.
+	"""
+
+	links = [
+		"listasiptvgratis"
+	]
+
+	file_name_m3u     = "bergamota.m3u"
+	file_name_m3u_tmp = "bergamota.tmp"
+
+	def listasiptvgratis(self):
+		"""
+		Crawling para o site 'https://listasiptvgratis.com/'.
+
+		Returns:
+			str[]: Links coletados do site
+		"""
+		content = self._getLinkLines("https://listasiptvgratis.com/").split("\n")
+		links   = []
+		valids  = [i for j in (range(21, 31), range(84, 94)) for i in j]
+		counter = 0
+		for line in content:
+			if "data-clipboard-text" not in line:
+				continue
+			counter += 1
+			if counter not in valids:
+				continue
+			links.append(re.sub("\".*", "", re.sub(".*data-clipboard-text=\"", "", line)))
+		return links
+
+
+	def _getLinkLines(self, link):
+		"""
+		Retorna o conteudo de uma link splitado por quebra de linha.
+
+		Args:
+			link (str): Link para coletar o conteudo
+
+		Returns:
+			str[]: Linhas coletadas
+		"""
+		headers  = {
+			"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36"
+		}
+		try:
+			response = requests.get(link, headers=headers, timeout=5)
+			return re.sub("\r", "", response.text)
+		except:
+			return []
+
+
+	def _getExtInfo(self, line, info):
+		return re.sub("\".*", "", re.sub(".*" + info + "=\"", "", line))
+
+
+	def _threadParseList(self, link):
+		print("Downloading list:", link)
+		lines    = self._getLinkLines(link)
+
+		# if (len(lines) > 10000):
+		# 	print("TOO LONG! Skipping list", link, "with", len(lines), "lines!")
+		# 	return
+
+		re.sub("(#EXTINF.*\n)(http.*\n)", self._regExCallback, lines)
+
+	def clearFile(self):
+		path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+		with open(os.path.join(path, self.file_name_m3u_tmp), "w+") as file:
+			file.write("")
+
+
+	def _regExCallback(self, match):
+		all      = match.group(0).strip().split("\n")
+		line     = all[0]
+		url      = all[1]
+		headers  = {
+			"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36"
+		}
+
+		id    = self._getExtInfo(line, "tvg-id").strip()
+		group = self._getExtInfo(line, "group-title").strip()
+		logo  = self._getExtInfo(line, "tvg-logo").strip()
+		name  = self._getExtInfo(line, "tvg-name").strip()
+
+		name  = name if len(name) and "#" not in name else re.sub(".*,", "", line).strip()
+		group = "- Sem categoria -" if "#EXTINF" in group else group
+		logo  = logo if validators.url(logo) else ""
+		id    = id if len(id) else name
+		print("Checking", url)
+
+
+		if not validators.url(url):
+			return
+
+		try:
+			req    = requests.get(url, timeout=1)
+			status = req.status_code
+		except Exception as e:
+			print("[OFF]", e)
+			return
+
+		if ".m3u" in url or ".ts" in url:
+			pass
+		elif ".mp4" in url or ".mkv" in url:
+			group = "- Filmes/Series [MP4/MKV] -"
+		else:
+			print("[OUT]", name)
+			return
+
+		if status > 400:
+			print("[OFF]", name)
+			return
+		
+		self.appendSourceLine(id, name, logo, group, url)
+
+
+	def appendLine(self, line):
+		line = line + "\n\n"
+		path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+
+		while global_lock.locked():
+			continue
+
+		global_lock.acquire()
+
+		with open(os.path.join(path, self.file_name_m3u_tmp), "a+") as file:
+			file.write(line)
+			file.close()
+
+		global_lock.release()
+		return True
+
+
+	def appendSourceLine(self, id, name, logo, group, url):
+		line = "#EXTINF:-1 tvg-id=\"%s\" tvg-name=\"%s\" tvg-logo=\"%s\" group-title=\"%s\",%s\n%s" % (
+			id,
+			name,
+			logo,
+			group,
+			name,
+			url
+		)
+		return self.appendLine(line)
+
+if __name__ == "__main__":
+	global_lock = threading.Lock()
+	links       = Crawler()
+	all         = []
+	all         = ["https://bit.ly/faustinotv"]
+	threads     = []
+	now         = datetime.datetime.now()
+	dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
+
+	links.clearFile()
+
+	links.appendLine("#EXTM3U")
+	links.appendLine("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"")
+	links.appendLine("#EXTINF:-1 tvg-id="" group-title=\"Info\", Atualizada em: " + dthr)
+
+	# for i in links.links:
+	# 	print("Collecting from", i)
+	# 	crawl = getattr(links, i)
+	# 	all  += crawl()
+
+	all = list(set(all))
+
+	for link in all:
+		links.appendLine("#EXTINF:-1 tvg-id="" group-title=\"Info\", Fonte: " + link)
+		t = threading.Thread(target=links._threadParseList, args=(link,))
+		t.start()
+		threads.append(t)
+
+	for t in threads:
+		t.join()
+
+	print("Done")
