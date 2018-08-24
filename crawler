@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
+# -*- coding: Utf-8 -*-
 import datetime
 import inspect
 import os
 import re
 import requests
 import threading
-import unidecode
 import validators
 
 class Crawler:
@@ -135,8 +135,8 @@ class Crawler:
 
 		global_lock.acquire()
 
-		with open(unidecode.unidecode(os.path.join(path, self.file_name_m3u_tmp)), "a+") as file:
-			file.write(str(unidecode.unidecode(line).encode("ascii")))
+		with open(os.path.join(path, self.file_name_m3u_tmp), "a+") as file:
+			file.write(line)
 			file.close()
 
 		global_lock.release()
