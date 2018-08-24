@@ -104,10 +104,10 @@ class Crawler:
 			return
 
 		try:
-			req    = requests.get(url, timeout=1)
+			req    = requests.get(url, timeout=3)
 			status = req.status_code
-		except Exception as e:
-			print("[OFF]", e)
+		except:
+			print("\t[OFF] (Timeout)", name)
 			return
 
 		if ".m3u" in url or ".ts" in url:
@@ -115,13 +115,13 @@ class Crawler:
 		elif ".mp4" in url or ".mkv" in url:
 			group = "- Filmes/Series [MP4/MKV] -"
 		else:
-			print("[OUT]", name)
 			return
 
 		if status > 400:
-			print("[OFF]", name)
+			print("\t[OFF][", status, "]: ", name)
 			return
-		
+
+		print("\t[ON]", name)
 		self.appendSourceLine(id, name, logo, group, url)
 
 
