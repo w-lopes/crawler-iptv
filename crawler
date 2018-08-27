@@ -2,11 +2,11 @@
 # -*- coding: Utf-8 -*-
 import datetime
 import inspect
+import gc
 import os
 import re
 import requests
 import sys
-import time
 import threading
 import validators
 
@@ -122,7 +122,7 @@ class Crawler:
 
 		print("\t[ON]", name)
 		self.appendSourceLine(id, name, logo, group, url)
-		time.sleep(100/1000000)
+		gc.collect()
 
 
 	def appendLine(self, line):
