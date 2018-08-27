@@ -110,12 +110,10 @@ class Crawler:
 			print("\t[OFF] (Timeout)", name)
 			return
 
-		if ".m3u" in url or ".ts" in url:
-			pass
-		elif ".mp4" in url or ".mkv" in url:
-			group = "- Filmes/Series [MP4/MKV] -"
-		else:
+		if ".m3u" not in url or ".ts" not in url:
 			return
+		# elif ".mp4" in url or ".mkv" in url:
+		# 	return
 
 		if status > 400:
 			print("\t[OFF][", status, "]: ", name)
