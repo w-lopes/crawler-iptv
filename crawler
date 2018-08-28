@@ -73,7 +73,8 @@ class Crawler:
 	def _threadParseList(self, link):
 		print("Downloading list:", link)
 		lines = self._getLinkLines(link)
-		re.sub("(#EXTINF.*\n)(http.*\n)", self._regExCallback, lines)
+		if lines:
+			re.sub("(#EXTINF.*\n)(http.*\n)", self._regExCallback, lines)
 
 	def clearFile(self):
 		path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
@@ -102,27 +103,27 @@ class Crawler:
 		# print("Checking", url)
 
 		if not validators.url(url):
-			print("\t[OUT]", name)
+			print("\t[\033[93mOUT\033[0m]", name)
 			return
 
 		try:
 			req    = requests.head(url, headers=headers, timeout=3)
 			status = req.status_code
 		except:
-			print("\t[OFF] (Timeout)", name)
+			print("\t[\033[91mOFF\033[0m] (Timeout)", name)
 			return
 
 		if ".m3u" not in url and ".ts" not in url:
-			print("\t[OUT]", name)
+			print("\t[\033[93mOUT\033[0m]", name)
 			return
 		# elif ".mp4" in url or ".mkv" in url:
 		# 	return
 
 		if status > 400:
-			print("\t[OFF][", status, "]: ", name)
+			print("\t[\033[91mOFF\033[0m][", status, "]: ", name)
 			return
 
-		print("\t[ON]", name)
+		print("\t[\033[92mON\033[0m]", name)
 		self.appendSourceLine(id, name, logo, group, url)
 
 
