@@ -1,5 +1,9 @@
 <?php
 
+$extras = [ 
+    "https://bit.ly/faustinotv"
+];
+
 $links = [
     "https://listasiptvgratis.com/" => function(){
         $dom = new DOMDocument();
@@ -16,7 +20,7 @@ $links = [
             $lists[] = preg_replace("/Link\$/", "", explode(" ", $line)[1]);
         }
         return $lists;
-    }/*,
+    },
     "https://listaiptvbrasilhd.com.br/" => function(){
         $dom = new DOMDocument();
         libxml_use_internal_errors(true);
@@ -38,22 +42,56 @@ $links = [
             }
         }
         return $lists;
-    }*/
+    }
 ];
 
 class Task extends Threaded
 {
     private $value;
+    private $m3u;
 
     public function __construct(array $i, int $id)
     {
+        stream_context_set_default(['http' => ['method' => 'HEAD',
+                                               'timeout' => 10,
+                                               'user_agent' => 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)']]);
+    
         $this->value = $i;
         $this->id = $id;
     }
 
+    public function start_m3u()
+    {
+        $this->m3u = "";
+    }
+
+    public function add_m3u($id, $logo, $group, $name, $url)
+    {
+        $this->m3u .= "#EXTINF:-1 tvg-id=\"{$id}\" tvg-logo=\"{$logo}\" group-title=\"{$group}\",{$name}";
+        $this->m3u .= PHP_EOL;
+        $this->m3u .= $url;
+        $this->m3u .= PHP_EOL . PHP_EOL;
+
+        // $channels[$group][] = [
+        //     "url"  => $url,
+        //     "name" => $name,
+        //     "logo" => $logo
+        // ];
+
+        //file_put_contents("{$path}list.json", json_encode($channels, JSON_PRETTY_PRINT));
+        //file_put_contents("{$path}list.m3u",  $m3u_file);
+    }
+
+    public function write_m3u()
+    {
+        $this->synchronized(function($thread){
+            file_put_contents("lista.m3u", $this->m3u, FILE_APPEND);        
+        }, $this);
+    }
+
     public function checkLink($url)
     {
-        $headers = get_headers($url);
+        $headers = @get_headers($url);
         if (!$headers){
             return false;
         }
@@ -71,12 +109,10 @@ class Task extends Threaded
 
     public function run()
     {
+        $this->start_m3u();
+
         foreach ($this->value as $i => $line)
         {
-            print("Thread {$this->id}, Run line -> $line\n");
-
-            usleep(1000);
-
             if (strpos($line, "#EXTINF") === false){
                 continue;
             }
@@ -95,70 +131,59 @@ class Task extends Threaded
             $group = $this->getExtInfo("group-title", $line);
             $logo  = $this->getExtInfo("tvg-logo", $line);
             $id    = $this->getExtInfo("tvg-id", $line);
-            $name  = $id ?: trim(preg_replace("/(?:.(?!,))+\$/", "", $line), ",");
+            $name  = $this->getExtInfo("tvg-name", $line);
 
-            var_dump("ID: $id", "NAME: $name", "LOGO: $logo", "GROUP: $group");
-
-            if (strpos($name, "#") !== false){
-                //continue;
+            if(!$name)
+            {
+                preg_match("/(?:.*,)(.*)/", $line, $name);
+                $name = $name[1];
             }
 
-            if (!$group || strpos($group, "#EXTINF") !== false || strpos($group, "#extinf") !== false){
+            if (!$group)
                 $group = "Sem categoria";
-            }
 
             $group = $mp4 ? "[MP4] {$group}" : $group;
 
             if (!$this->checkLink($url)){
-                print("Thread {$this->id} Link $url off\n");
+                print("Thread {$this->id}: Link $name [\033[31mOFF\033[0m]\n");
                 continue;
             }
             else
-                print("Thread {$this->id}Link $url on\n");
+                print("Thread {$this->id}: Link $name [\033[32mON\033[0m]\n");
 
-            $channels[$group][] = [
-                "url"  => $url,
-                "name" => $name,
-                "logo" => $logo
-            ];
-
-            $m3u_file .= "#EXTINF:-1 tvg-id=\"{$id}\" tvg-logo=\"{$logo}\" group-title=\"{$group}\",{$name}";
-            $m3u_file .= PHP_EOL;
-            $m3u_file .= $url;
-            $m3u_file .= PHP_EOL . PHP_EOL;
-
-            print($m3u_file);
+            $this->add_m3u($id, $logo, $group, $name, $url);
         }
+
+        $this->write_m3u();
     }
 }
 
-function main(){
+function main()
+{
     global $extras, $path, $links;
     $threads  = 0;
     $lists    = [];
     $channels = [];
-    $m3u_file =
-        "#EXTM3U" . PHP_EOL . PHP_EOL .
-        "#PLAYLISTV:  pltv-name=\"Bergamota list\" pltv-description=\"LISTA DE CANAIS\" pltv-author=\"Bergamota Inc.\"" . PHP_EOL . PHP_EOL .
-        "############# Atualizado em " . date("d/m/Y H:i:s") . " #############" . PHP_EOL . PHP_EOL;
 
-    foreach ($links as $link => $func){
-        $m3u_file .= "############# Agradecimento: {$link} #############" . PHP_EOL . PHP_EOL;
+    print("Getting main lists.....\n");
+
+    foreach ($links as $link => $func)
+    {
         $lists = array_merge($lists, $func());
-
-        print("Parsed list $link\n");
+        print("Parsed list $link [\033[32mOK\033[0m]\n");
     }
 
-    //$lists = array_unique(array_merge($lists, $extras));
+    $lists = array_unique(array_merge($lists, $extras));
+
     $pool = new Pool(sizeof($lists));
+
+    file_put_contents("lista.m3u", "#EXTM3U" . PHP_EOL . PHP_EOL .
+    "#PLAYLISTV:  pltv-name=\"Bergamota list\" pltv-description=\"LISTA DE CANAIS\" pltv-author=\"Bergamota Inc.\"" . PHP_EOL . PHP_EOL .
+    "############# Atualizado em " . date("d/m/Y H:i:s") . " #############" . PHP_EOL . PHP_EOL);
 
     foreach ($lists as $list)
     {
-        print("Staring list $list\n");
-
-        $m3u_file .= PHP_EOL;
-        $m3u_file .= "############# Fonte: {$list} #############";
-        $m3u_file .= PHP_EOL;
+        print("Staring list $list [\033[32mOK\033[0m]\n");
 
         $agent = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)';
         $ch    = curl_init();
@@ -169,36 +194,20 @@ function main(){
         curl_setopt($ch, CURLOPT_USERAGENT,      $agent);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_URL,            $list);
+        curl_setopt($ch, CURLOPT_TIMEOUT,        15);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
 
         $result = curl_exec($ch);
         $lines  = explode(PHP_EOL, $result);
 
+        // start a thread for every new list
         $pool->submit(new Task($lines, $threads++));
-        sleep(10);
 
         curl_close($ch);
     }
 
     while ($pool->collect());
     $pool->shutdown();
-
-    //file_put_contents("{$path}list.json", json_encode($channels, JSON_PRETTY_PRINT));
-    //file_put_contents("{$path}list.m3u",  $m3u_file);
 }
-
 
 main();
-
-/*
-# Create a pool of 4 threads
-$pool = new Pool(4);
-
-for ($i = 0; $i < 15000; ++$i)
-{
-    $pool->submit(new Task($i));
-}
-
-while ($pool->collect());
-
-$pool->shutdown();
-*/
