@@ -247,20 +247,21 @@ if __name__ == "__main__":
 		"multishow"      : "Variedades",
 		"comedy central" : "Variedades",
 
-		"news" : "Notícias",
+		"globo news" : "Notícias",
+		"band news" : "Notícias",
 
 		# "globo"  : "Aberto",
 		# "sbt"    : "Aberto",
 		# "record" : "Aberto",
 		# "band"   : "Aberto",
 
-		"xxx"      : "Adulto",
-		"playboy"  : "Adulto",
-		"sex"      : "Adulto",
-		"hot"      : "Adulto",
-		"venus"    : "Adulto",
-		"miami tv" : "Adulto",
-		"miamitv"  : "Adulto"
+		# "xxx"      : "Adulto",
+		# "playboy"  : "Adulto",
+		# "sex"      : "Adulto",
+		# "hot"      : "Adulto",
+		# "venus"    : "Adulto",
+		# "miami tv" : "Adulto",
+		# "miamitv"  : "Adulto"
 	}
 
 	all_urls  = []
