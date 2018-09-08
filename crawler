@@ -73,6 +73,9 @@ class Crawler:
 	def _threadParseList(self, link):
 		print("Downloading list:", link)
 		lines = self._getLinkLines(link)
+		if len(lines) > 1 * 1024 * 1024:
+			print("\t[\033[91mSIZE\033[0m]", link)
+			return
 		if lines:
 			re.sub("(#EXTINF.*\n)(http.*\n)", self._regExCallback, lines)
 
@@ -83,6 +86,8 @@ class Crawler:
 
 
 	def _regExCallback(self, match):
+		global all_urls, all_names, black_list, pre_group
+
 		all      = match.group(0).strip().split("\n")
 		line     = all[0]
 		url      = all[1]
@@ -91,19 +96,34 @@ class Crawler:
 			"Connection" : "close"
 		}
 
-		id    = self._getExtInfo(line, "tvg-id").strip()
-		group = self._getExtInfo(line, "group-title").strip()
 		logo  = self._getExtInfo(line, "tvg-logo").strip()
 		name  = self._getExtInfo(line, "tvg-name").strip()
+		aname = re.sub("\W", "", name)
+
+		if re.search('^[a-zA-Z]{1,4}:', name):
+			return
 
 		name  = name if len(name) and "#" not in name else re.sub(".*,", "", line).strip()
-		group = "- Sem categoria -" if "#EXTINF" in group else group
 		logo  = logo if validators.url(logo) else ""
-		id    = id if len(id) else name
-		# print("Checking", url)
+		group = ""
+
+		for i in black_list:
+			if i in name.lower():
+				return
+
+		for attr, value in pre_group.items():
+			if attr in name.lower():
+				group = value
+				break
+
+		if not group:
+			return;
+
+		if (url in all_urls) or (aname in all_names and all_names[aname] > 2):
+			print("\t[\033[93mDUP\033[0m]", name)
+			return
 
 		if not validators.url(url):
-			print("\t[\033[93mOUT\033[0m]", name)
 			return
 
 		try:
@@ -114,17 +134,20 @@ class Crawler:
 			return
 
 		if ".m3u" not in url and ".ts" not in url:
-			print("\t[\033[93mOUT\033[0m]", name)
 			return
-		# elif ".mp4" in url or ".mkv" in url:
-		# 	return
 
 		if status > 400:
 			print("\t[\033[91mOFF\033[0m][", status, "]: ", name)
 			return
 
-		print("\t[\033[92mON\033[0m]", name)
-		self.appendSourceLine(id, name, logo, group, url)
+		all_urls.append(url)
+		if (name in all_names):
+			all_names[aname] = all_names[aname] + 1
+		else:
+			all_names[aname] = 1
+
+		print("\t[\033[92mON\033[0m] \033[1;30m(", group, ")\033[0m", name)
+		self.appendSourceLine(name, logo, group, url)
 
 
 	def appendLine(self, line):
@@ -144,9 +167,8 @@ class Crawler:
 		return True
 
 
-	def appendSourceLine(self, id, name, logo, group, url):
-		line = "#EXTINF:-1 tvg-id=\"%s\" tvg-name=\"%s\" tvg-logo=\"%s\" group-title=\"%s\",%s\n%s" % (
-			id,
+	def appendSourceLine(self, name, logo, group, url):
+		line = "#EXTINF:-1 tvg-name=\"%s\" tvg-logo=\"%s\" group-title=\"%s\",%s\n%s" % (
 			name,
 			logo,
 			group,
@@ -158,45 +180,126 @@ class Crawler:
 
 if __name__ == "__main__":
 
-	while True:
+	black_list = [
+		"canales",
+		"chile",
+		"infantiles",
+		"peliculas",
+		"ecuador",
+		"mexico",
+		"calidad",
+		"espan",
+		"españ",
+		"nuestra",
+		"camara",
+		"câmara",
+		"latino",
+		"suiza",
+		"collage",
+		"usa",
+		"sur",
+		"business",
+		"atlanta",
+		"sexta",
+		"spain",
+		"privada",
+		"inernacional",
+		"cbs",
+		"tv",
+		"!",
+		"-",
+		"(",
+		")"
+	]
+	pre_group = {
+		"sky"       : "SKY",
 
-		try:
-			global_lock = threading.Lock()
-			links       = Crawler()
-			threads     = []
-			now         = datetime.datetime.now()
-			dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
-			path        = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-			all         = ["https://bit.ly/faustinotv"]
+		"sportv"    : "Esporte",
+		"fox sport" : "Esporte",
+		"foxsport"  : "Esporte",
+		"combate"   : "Esporte",
+		"espn"      : "Esporte",
+		"premiere"  : "Esporte",
 
-			links.clearFile()
+		"telecine"  : "Filme/Serie",
+		"fox"       : "Filme/Serie",
+		"warner"    : "Filme/Serie",
+		"hbo"       : "Filme/Serie",
+		"universal" : "Filme/Serie",
 
-			links.appendLine("#EXTM3U")
-			links.appendLine("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"")
-			links.appendLine("#EXTINF:-1 tvg-id="" group-title=\"Info\", Atualizada em: " + dthr)
+		"cartoon"   : "Infantil",
+		"nick"      : "Infantil",
+		"disney"    : "Infantil",
+		"gloob"     : "Infantil",
+		"kids"      : "Infantil",
 
-			for i in links.links:
-				print("Collecting from", i)
-				crawl = getattr(links, i)
-				all  += crawl()
+		"discovery"           : "Documentário",
+		"natgeo"              : "Documentário",
+		"national geographic" : "Documentário",
+		"animal planet"       : "Documentário",
+		"history"             : "Documentário",
 
-			all = list(set(all))
+		"gnt"            : "Variedades",
+		"mtv"            : "Variedades",
+		"multishow"      : "Variedades",
+		"comedy central" : "Variedades",
 
-			for link in all:
-				links.appendLine("#EXTINF:-1 tvg-id="" group-title=\"Info\", Fonte: " + link)
-				t = threading.Thread(target=links._threadParseList, args=(link,))
-				t.start()
-				threads.append(t)
+		"news" : "Notícias",
 
-			for t in threads:
-				t.join()
+		"globo"  : "Aberto",
+		"sbt"    : "Aberto",
+		"record" : "Aberto",
+		"band"   : "Aberto",
 
-			os.rename(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
-			print("Done")
-		except (KeyboardInterrupt, SystemExit):
-			os.rename(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
-			print("Exiting")
-			sys.exit(0)
-		except Exception as e:
-			print("Exception", e)
-			pass
+		"xxx"      : "Adulto",
+		"adult"    : "Adulto",
+		"playboy"  : "Adulto",
+		"sex"      : "Adulto",
+		"hot"      : "Adulto",
+		"venus"    : "Adulto",
+		"miami tv" : "Adulto",
+		"miamitv"  : "Adulto"
+	}
+
+	all_urls  = []
+	all_names = {}
+
+	try:
+		global_lock = threading.Lock()
+		links       = Crawler()
+		threads     = []
+		now         = datetime.datetime.now()
+		dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
+		path        = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+		all         = ["https://bit.ly/faustinotv"]
+
+		links.clearFile()
+
+		links.appendLine("#EXTM3U")
+		links.appendLine("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"")
+		links.appendLine("#EXTINF:-1 tvg-id="" group-title=\"Info\", Atualizada em: " + dthr)
+
+		for i in links.links:
+			print("Collecting from", i)
+			crawl = getattr(links, i)
+			all  += crawl()
+
+		all = list(set(all))
+
+		for link in all:
+			t = threading.Thread(target=links._threadParseList, args=(link,))
+			t.start()
+			threads.append(t)
+
+		for t in threads:
+			t.join()
+
+		os.rename(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
+		print("Done")
+	except (KeyboardInterrupt, SystemExit):
+		os.rename(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
+		print("Exiting")
+		sys.exit(0)
+	except Exception as e:
+		print("Exception", e)
+		pass
