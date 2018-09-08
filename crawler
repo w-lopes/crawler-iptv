@@ -204,6 +204,9 @@ if __name__ == "__main__":
 		"spain",
 		"privada",
 		"inernacional",
+		"classic"
+		"fox comedy"
+		"estados unidos"
 		"cbs",
 		"tv",
 		"!",
@@ -246,13 +249,12 @@ if __name__ == "__main__":
 
 		"news" : "Notícias",
 
-		"globo"  : "Aberto",
-		"sbt"    : "Aberto",
-		"record" : "Aberto",
-		"band"   : "Aberto",
+		# "globo"  : "Aberto",
+		# "sbt"    : "Aberto",
+		# "record" : "Aberto",
+		# "band"   : "Aberto",
 
 		"xxx"      : "Adulto",
-		"adult"    : "Adulto",
 		"playboy"  : "Adulto",
 		"sex"      : "Adulto",
 		"hot"      : "Adulto",
