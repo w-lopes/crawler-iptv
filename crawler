@@ -57,7 +57,10 @@ class Crawler:
 			"Connection" : "close"
 		}
 		try:
-			response = requests.get(link, headers=headers, timeout=5)
+			sess     = requests.Session()
+			response = sess.get(link, headers=headers, timeout=5)
+			sess.close()
+			del sess
 			if split:
 				return re.sub("\r", "", response.text).split("\n")
 			else:
@@ -86,22 +89,20 @@ class Crawler:
 
 
 	def _regExCallback(self, match):
-		global all_urls, all_names, black_list, pre_group
+		global all_urls, all_names, black_list, beg_with
 
 		all      = match.group(0).strip().split("\n")
 		line     = all[0]
 		url      = all[1]
 		headers  = {
-			"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36",
-			"Connection" : "close"
+			"User-Agent"    : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36",
+			"Connection"    : "close",
+			"Cache-Control" : "no-cache"
 		}
 
 		logo  = self._getExtInfo(line, "tvg-logo").strip()
 		name  = self._getExtInfo(line, "tvg-name").strip()
 		aname = re.sub("\W", "", name)
-
-		if re.search('^[a-zA-Z]{1,4}:', name):
-			return
 
 		name  = name if len(name) and "#" not in name else re.sub(".*,", "", line).strip()
 		logo  = logo if validators.url(logo) else ""
@@ -111,15 +112,15 @@ class Crawler:
 			if i in name.lower():
 				return
 
-		for attr, value in pre_group.items():
-			if attr in name.lower():
+		for attr, value in beg_with.items():
+			if name.lower().startswith(attr):
 				group = value
 				break
 
 		if not group:
 			return;
 
-		if (url in all_urls) or (aname in all_names and all_names[aname] > 2):
+		if (url in all_urls) or (aname in all_names and all_names[aname] > 1):
 			print("\t[\033[93mDUP\033[0m]", name)
 			return
 
@@ -127,8 +128,11 @@ class Crawler:
 			return
 
 		try:
-			req    = requests.head(url, headers=headers, timeout=3)
+			sess   = requests.Session()
+			req    = sess.get(url, headers=headers, stream=False, timeout=1)
 			status = req.status_code
+			sess.close()
+			del sess, req
 		except:
 			print("\t[\033[91mOFF\033[0m] (Timeout)", name)
 			return
@@ -204,19 +208,30 @@ if __name__ == "__main__":
 		"spain",
 		"privada",
 		"inernacional",
-		"classic"
-		"fox comedy"
-		"estados unidos"
+		"classic",
+		"fox comedy",
+		"fox premium",
+		"fox action",
+		"fox family",
+		"fox cinema",
+		"fox 23",
+		"estados unidos",
 		"cbs",
-		"tv",
-		"!",
-		"-",
-		"(",
-		")"
+		"manipuladora",
+		"sbt pi",
+		"interior",
+		"no audio",
+		"noaudio",
+		"radio",
+		"mtv rocks",
+		"mtv dance",
+		"mtv live",
+		"mtv hits",
+		"japan",
+		"russia",
+		"uk"
 	]
-	pre_group = {
-		"sky"       : "SKY",
-
+	beg_with = {
 		"sportv"    : "Esporte",
 		"fox sport" : "Esporte",
 		"foxsport"  : "Esporte",
@@ -230,11 +245,13 @@ if __name__ == "__main__":
 		"hbo"       : "Filme/Serie",
 		"universal" : "Filme/Serie",
 
-		"cartoon"   : "Infantil",
-		"nick"      : "Infantil",
-		"disney"    : "Infantil",
-		"gloob"     : "Infantil",
-		"kids"      : "Infantil",
+		"cartoon"      : "Infantil",
+		"nick"         : "Infantil",
+		"disney"       : "Infantil",
+		"gloob"        : "Infantil",
+		"natgeokids"   : "Infantil",
+		"natgeo kids"  : "Infantil",
+		"nat geo kids" : "Infantil",
 
 		"discovery"           : "Documentário",
 		"natgeo"              : "Documentário",
@@ -248,20 +265,20 @@ if __name__ == "__main__":
 		"comedy central" : "Variedades",
 
 		"globo news" : "Notícias",
-		"band news" : "Notícias",
+		"band news"  : "Notícias",
 
 		# "globo"  : "Aberto",
 		# "sbt"    : "Aberto",
 		# "record" : "Aberto",
 		# "band"   : "Aberto",
 
-		# "xxx"      : "Adulto",
 		# "playboy"  : "Adulto",
-		# "sex"      : "Adulto",
+		# "sexyhot"  : "Adulto",
 		# "hot"      : "Adulto",
 		# "venus"    : "Adulto",
 		# "miami tv" : "Adulto",
-		# "miamitv"  : "Adulto"
+		# "miamitv"  : "Adulto",
+		# "jasmine"  : "Adulto"
 	}
 
 	all_urls  = []

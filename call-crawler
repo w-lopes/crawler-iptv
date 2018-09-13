@@ -5,5 +5,5 @@ BASEDIR=$(dirname "$0")
 while true
 do
 	"$BASEDIR/crawler"
-	sleep 5
+	sleep 60
 done
