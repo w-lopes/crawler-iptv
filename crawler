@@ -188,6 +188,7 @@ class Crawler:
 if __name__ == "__main__":
 
 	black_list = [
+		"bergamota",
 		"canales",
 		"chile",
 		"infantiles",
