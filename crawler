@@ -254,7 +254,16 @@ if __name__ == "__main__":
         "globo brasil",
         "record mt",
         "mt",
-        "sc"
+        "sc",
+        "nordeste",
+        "goias",
+        "portugal",
+        "água boa",
+        "agua boa",
+        "sbt go",
+        "record pt",
+        "signature",
+        "angola"
 	]
 	beg_with = {
 		"sportv"    : "Esportes",
@@ -272,6 +281,7 @@ if __name__ == "__main__":
 		"space"            : "Filmes",
 		"max"              : "Filmes",
 		"paramount"        : "Filmes",
+		"band sport"       : "Filmes",
 
 		"universal" : "Séries",
 		"fox"       : "Séries",
@@ -304,6 +314,9 @@ if __name__ == "__main__":
 		"h2"                  : "Documentários",
 		"investigacao"        : "Documentários",
 		"investigação"        : "Documentários",
+		"home & health"       : "Documentários",
+		"home&health"         : "Documentários",
+		"h&h"                 : "Documentários",
 
 		"gnt"            : "Variedades",
 		"mtv"            : "Variedades",
@@ -316,11 +329,12 @@ if __name__ == "__main__":
 		"band news"    : "Notícias",
 		"record news"  : "Notícias",
 
-		"globo"  : "Abertos",
-		"sbt"    : "Abertos",
-		"record" : "Abertos",
-		"band"   : "Abertos",
-		"futura" : "Abertos",
+		"globo"   : "Abertos",
+		"sbt"     : "Abertos",
+		"record"  : "Abertos",
+		"band"    : "Abertos",
+		"futura"  : "Abertos",
+		"cultura" : "Abertos",
 
 		# "playboy"  : "Adultos +18",
 		# "sexyhot"  : "Adultos +18",
