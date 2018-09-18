@@ -179,7 +179,7 @@ class Crawler:
 			name,
 			logo,
 			group,
-			name,
+			name.upper(),
 			url
 		)
 		return self.appendLine(line)
