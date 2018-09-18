@@ -108,8 +108,11 @@ class Crawler:
 		logo  = logo if validators.url(logo) else ""
 		group = ""
 
+		if re.match("FOX\s\d+", name):
+			return
+
 		for i in black_list:
-			if i in name.lower():
+			if i in name.lower() or i in url.lower():
 				return
 
 		for attr, value in beg_with.items():
@@ -129,7 +132,7 @@ class Crawler:
 
 		try:
 			sess   = requests.Session()
-			req    = sess.get(url, headers=headers, stream=False, timeout=1)
+			req    = sess.get(url, headers=headers, stream=True, timeout=3)
 			status = req.status_code
 			sess.close()
 			del sess, req
@@ -150,7 +153,7 @@ class Crawler:
 		else:
 			all_names[aname] = 1
 
-		print("\t[\033[92mON\033[0m] \033[1;30m(", group, ")\033[0m", name)
+		print("\t[\033[92mON\033[0m] \033[1;30m(", group, ")\033[0m[", status, "]: ", name)
 		self.appendSourceLine(name, logo, group, url)
 
 
@@ -215,6 +218,7 @@ if __name__ == "__main__":
 		"fox family",
 		"fox cinema",
 		"fox 23",
+		"fox 5",
 		"estados unidos",
         "premiun",
 		"manipuladora",
@@ -319,7 +323,14 @@ if __name__ == "__main__":
 		now         = datetime.datetime.now()
 		dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
 		path        = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-		all         = ["https://bit.ly/faustinotv"]
+		all         = [
+			"https://bit.ly/faustinotv",
+			"https://tinyurl.com/CANAISGLAU",
+			"https://tinyurl.com/ESPORTEGLAU",
+			"https://tinyurl.com/DOCUMENTARIOSGLAU",
+			"http://minhalista.live/LANNNN",
+			"http://bit.ly/Will-Canais"
+		]
 
 		links.clearFile()
 
