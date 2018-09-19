@@ -151,28 +151,31 @@ class Crawler:
 
 		global_lock.acquire()
 
-		name  = name.upper()
-		group = group.upper()
+        try:
+            name  = name.upper()
+            group = group.upper()
 
-		try:
-			all_canais[group]
-		except KeyError:
-			all_canais[group] = {}
+            try:
+                all_canais[group]
+            except KeyError:
+                all_canais[group] = {}
 
-		try:
-			all_canais[group][name]
-		except KeyError:
-			all_canais[group][name] = []
+            try:
+                all_canais[group][name]
+            except KeyError:
+                all_canais[group][name] = []
 
-		if len(all_canais[group][name]) > 3:
-			return True
-		
+            if len(all_canais[group][name]) > 3:
+                return True
+            
 
-		all_canais[group][name].append({
-			"logo" : logo,
-			"url"  : url
-		})
-		all_urls.append(url)
+            all_canais[group][name].append({
+                "logo" : logo,
+                "url"  : url
+            })
+            all_urls.append(url)
+        except:
+            pass
 
 		global_lock.release()
 		return True
