@@ -151,31 +151,31 @@ class Crawler:
 
 		global_lock.acquire()
 
-        try:
-            name  = name.upper()
-            group = group.upper()
+		try:
+			name  = name.upper()
+			group = group.upper()
 
-            try:
-                all_canais[group]
-            except KeyError:
-                all_canais[group] = {}
+			try:
+				all_canais[group]
+			except KeyError:
+				all_canais[group] = {}
 
-            try:
-                all_canais[group][name]
-            except KeyError:
-                all_canais[group][name] = []
+			try:
+				all_canais[group][name]
+			except KeyError:
+				all_canais[group][name] = []
 
-            if len(all_canais[group][name]) > 3:
-                return True
-            
+			if len(all_canais[group][name]) > 3:
+				return True
+			
 
-            all_canais[group][name].append({
-                "logo" : logo,
-                "url"  : url
-            })
-            all_urls.append(url)
-        except:
-            pass
+			all_canais[group][name].append({
+				"logo" : logo,
+				"url"  : url
+			})
+			all_urls.append(url)
+		except:
+			pass
 
 		global_lock.release()
 		return True
@@ -220,7 +220,7 @@ if __name__ == "__main__":
 		"fox 23",
 		"fox 5",
 		"estados unidos",
-        "premiun",
+		"premiun",
 		"manipuladora",
 		"interior",
 		"no audio",
@@ -233,21 +233,21 @@ if __name__ == "__main__":
 		"japan",
 		"russia",
 		"uk",
-        "fm",
-        "internacion",
-        "kosova",
-        "clipes",
-        "band pa",
-        "banda max",
-        "record mt",
-        "nordeste",
-        "goias",
-        "portugal",
-        "água boa",
-        "agua boa",
-        "record pt",
-        "signature",
-        "angola",
+		"fm",
+		"internacion",
+		"kosova",
+		"clipes",
+		"band pa",
+		"banda max",
+		"record mt",
+		"nordeste",
+		"goias",
+		"portugal",
+		"água boa",
+		"agua boa",
+		"record pt",
+		"signature",
+		"angola",
 		"sucesso",
 		"bosna"
 	]
