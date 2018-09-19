@@ -340,18 +340,18 @@ if __name__ == "__main__":
 		dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
 		path        = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
 		all         = [
-			# "https://bit.ly/faustinotv",
-			# "https://tinyurl.com/CANAISGLAU",
-			# "https://tinyurl.com/ESPORTEGLAU",
-			# "https://tinyurl.com/DOCUMENTARIOSGLAU",
+			"https://bit.ly/faustinotv",
+			"https://tinyurl.com/CANAISGLAU",
+			"https://tinyurl.com/ESPORTEGLAU",
+			"https://tinyurl.com/DOCUMENTARIOSGLAU",
 			"http://minhalista.live/LANNNN",
-			# "http://bit.ly/Will-Canais"
+			"http://bit.ly/Will-Canais"
 		]
 
-		# for i in links.links:
-		# 	print("Collecting from", i)
-		# 	crawl = getattr(links, i)
-		# 	all  += crawl()
+		for i in links.links:
+			print("Collecting from", i)
+			crawl = getattr(links, i)
+			all  += crawl()
 
 		all = list(set(all))
 
