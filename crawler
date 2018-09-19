@@ -146,7 +146,7 @@ class Crawler:
 
 	def appendSource(self, name, logo, group, url):
 		while global_lock.locked():
-            time.sleep(30/1000000)
+			time.sleep(30/1000000)
 			continue
 
 		global_lock.acquire()
