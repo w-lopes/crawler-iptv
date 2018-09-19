@@ -7,6 +7,7 @@ import re
 import requests
 import sys
 import threading
+import time
 import validators
 
 class Crawler:
@@ -145,6 +146,7 @@ class Crawler:
 
 	def appendSource(self, name, logo, group, url):
 		while global_lock.locked():
+            time.sleep(30/1000000)
 			continue
 
 		global_lock.acquire()
