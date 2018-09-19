@@ -18,7 +18,7 @@ class Crawler:
 		"listasiptvgratis"
 	]
 
-	file_name_m3u     = "bergamota.m3u"
+	file_name_m3u = "bergamota.m3u"
 	file_name_m3u_tmp = "bergamota.tmp"
 
 	def listasiptvgratis(self):
@@ -82,14 +82,7 @@ class Crawler:
 		if lines:
 			re.sub("(#EXTINF.*\n)(http.*\n)", self._regExCallback, lines)
 
-	def clearFile(self):
-		path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-		with open(os.path.join(path, self.file_name_m3u_tmp), "w+") as file:
-			file.write("")
-
-
 	def _regExCallback(self, match):
-		global all_urls, all_names, black_list, beg_with
 
 		all      = match.group(0).strip().split("\n")
 		line     = all[0]
@@ -102,14 +95,10 @@ class Crawler:
 
 		logo  = self._getExtInfo(line, "tvg-logo").strip()
 		name  = self._getExtInfo(line, "tvg-name").strip()
-		aname = re.sub("\W", "", name)
 
 		name  = name if len(name) and "#" not in name else re.sub(".*,", "", line).strip()
 		logo  = logo if validators.url(logo) else ""
 		group = ""
-
-		if re.match("FOX\s\d+", name):
-			return
 
 		for i in black_list:
 			if i in name.lower() or i in url.lower():
@@ -123,9 +112,12 @@ class Crawler:
 		if not group:
 			return;
 
-		if (url in all_urls) or (aname in all_names and all_names[aname] > 1):
-			print("\t[\033[93mDUP\033[0m]", name)
-			return
+		try:
+			if (url in all_urls) or len(all_canais[group][name]) > 4:
+				print("\t[\033[93mDUP\033[0m]", name.upper())
+				return
+		except:
+			pass
 
 		if not validators.url(url):
 			return
@@ -147,42 +139,44 @@ class Crawler:
 			print("\t[\033[91mOFF\033[0m][", status, "]: ", name)
 			return
 
-		all_urls.append(url)
-		if (name in all_names):
-			all_names[aname] = all_names[aname] + 1
-		else:
-			all_names[aname] = 1
-
 		print("\t[\033[92mON\033[0m] \033[1;30m(", group, ")\033[0m[", status, "]: ", name)
-		self.appendSourceLine(name, logo, group, url)
+		self.appendSource(name, logo, group, url)
 
 
-	def appendLine(self, line):
-		line = line + "\n\n"
-		path = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-
+	def appendSource(self, name, logo, group, url):
 		while global_lock.locked():
 			continue
 
 		global_lock.acquire()
 
-		with open(os.path.join(path, self.file_name_m3u_tmp), "a+") as file:
-			file.write(line)
-			file.close()
+		name  = name.upper()
+		group = group.upper()
+
+		try:
+			all_canais[group]
+		except KeyError:
+			all_canais[group] = {}
+
+		try:
+			all_canais[group][name]
+		except KeyError:
+			all_canais[group][name] = []
+
+		if len(all_canais[group][name]) > 3:
+			return True
+		
+
+		all_canais[group][name].append({
+			"logo" : logo,
+			"url"  : url
+		})
+		all_urls.append(url)
 
 		global_lock.release()
 		return True
 
-
-	def appendSourceLine(self, name, logo, group, url):
-		line = "#EXTINF:-1 tvg-name=\"%s\" tvg-logo=\"%s\" group-title=\"%s\",%s\n%s" % (
-			name,
-			logo,
-			group,
-			name.upper(),
-			url
-		)
-		return self.appendLine(line)
+	def ksort(self, d):
+		return [{k: d[k]} for k in sorted(d.keys())]
 
 
 if __name__ == "__main__":
@@ -223,7 +217,6 @@ if __name__ == "__main__":
 		"estados unidos",
         "premiun",
 		"manipuladora",
-		"sbt pi",
 		"interior",
 		"no audio",
 		"noaudio",
@@ -235,36 +228,23 @@ if __name__ == "__main__":
 		"japan",
 		"russia",
 		"uk",
-        "globo sp",
-        "globo rj",
-        "globo minas",
-        "globo pi",
-        "sbt goiás",
-        "sbt goias",
-        "sbt recife",
         "fm",
         "internacion",
-        "sbt ba",
-        "sbt mt",
-        "sbt ma",
-        "sbt pe",
         "kosova",
         "clipes",
         "band pa",
         "banda max",
-        "globo brasil",
         "record mt",
-        "mt",
-        "sc",
         "nordeste",
         "goias",
         "portugal",
         "água boa",
         "agua boa",
-        "sbt go",
         "record pt",
         "signature",
-        "angola"
+        "angola",
+		"sucesso",
+		"bosna"
 	]
 	beg_with = {
 		"sportv"    : "Esportes",
@@ -330,12 +310,15 @@ if __name__ == "__main__":
 		"band news"    : "Notícias",
 		"record news"  : "Notícias",
 
-		"globo"   : "Abertos",
-		"sbt"     : "Abertos",
-		"record"  : "Abertos",
-		"band"    : "Abertos",
-		"futura"  : "Abertos",
-		"cultura" : "Abertos",
+		"globo sp"  : "Abertos",
+		"globo rj"  : "Abertos",
+		"globo rbs" : "Abertos",
+		"sbt sp"    : "Abertos",
+		"sbt rs"    : "Abertos",
+		"record"    : "Abertos",
+		"band"      : "Abertos",
+		"futura"    : "Abertos",
+		"cultura"   : "Abertos",
 
 		# "playboy"  : "Adultos +18",
 		# "sexyhot"  : "Adultos +18",
@@ -345,8 +328,9 @@ if __name__ == "__main__":
 		# "jasmine"  : "Adultos +18"
 	}
 
-	all_urls  = []
-	all_names = {}
+	all_urls   = []
+	all_names  = {}
+	all_canais = {}
 
 	try:
 		global_lock = threading.Lock()
@@ -356,24 +340,18 @@ if __name__ == "__main__":
 		dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
 		path        = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
 		all         = [
-			"https://bit.ly/faustinotv",
-			"https://tinyurl.com/CANAISGLAU",
-			"https://tinyurl.com/ESPORTEGLAU",
-			"https://tinyurl.com/DOCUMENTARIOSGLAU",
+			# "https://bit.ly/faustinotv",
+			# "https://tinyurl.com/CANAISGLAU",
+			# "https://tinyurl.com/ESPORTEGLAU",
+			# "https://tinyurl.com/DOCUMENTARIOSGLAU",
 			"http://minhalista.live/LANNNN",
-			"http://bit.ly/Will-Canais"
+			# "http://bit.ly/Will-Canais"
 		]
 
-		links.clearFile()
-
-		links.appendLine("#EXTM3U")
-		links.appendLine("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"")
-		links.appendLine("#EXTINF:-1 tvg-id="" group-title=\"Info\", Atualizada em: " + dthr)
-
-		for i in links.links:
-			print("Collecting from", i)
-			crawl = getattr(links, i)
-			all  += crawl()
+		# for i in links.links:
+		# 	print("Collecting from", i)
+		# 	crawl = getattr(links, i)
+		# 	all  += crawl()
 
 		all = list(set(all))
 
@@ -384,13 +362,45 @@ if __name__ == "__main__":
 
 		for t in threads:
 			t.join()
-
-		os.rename(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
-		print("Done")
 	except (KeyboardInterrupt, SystemExit):
-		os.rename(os.path.join(path, links.file_name_m3u_tmp), os.path.join(path, links.file_name_m3u))
 		print("Exiting")
-		sys.exit(0)
 	except Exception as e:
 		print("Exception", e)
 		pass
+
+	path       = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+	temp_file  = os.path.join(path, links.file_name_m3u_tmp)
+	m3u_file   = os.path.join(path, links.file_name_m3u)
+	all_canais = links.ksort(all_canais)
+
+	print("Cleaning temp file")
+	if os.path.exists(temp_file):
+		os.remove(temp_file)
+
+	print("Creating temp file")
+	with open(temp_file, "a+") as file:
+
+		file.write("#EXTM3U\n\n")
+		file.write("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"\n\n")
+		file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\", Atualizada em: " + dthr + "\nhttp://0.0.0.0\n\n")
+
+		for i in all_canais:
+			for j in i:
+				ord_canais = links.ksort(i[j])
+				for k in ord_canais:
+					for l in k:
+						for m in k:
+							for n in k[m]:
+								file.write("#EXTINF:-1 tvg-name=\"%s\" tvg-logo=\"%s\" group-title=\"%s\",%s\n%s\n\n" % (
+									m,
+									n["logo"],
+									j,
+									m,
+									n["url"]
+								))
+
+	print("Creating m3u file")
+	os.rename(temp_file, m3u_file)
+
+	print("Done")
+
