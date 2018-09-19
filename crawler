@@ -166,8 +166,8 @@ class Crawler:
 				all_canais[group][name] = []
 
 			if len(all_canais[group][name]) > 3:
+				global_lock.release()
 				return True
-			
 
 			all_canais[group][name].append({
 				"logo" : logo,
@@ -249,16 +249,18 @@ if __name__ == "__main__":
 		"signature",
 		"angola",
 		"sucesso",
-		"bosna"
+		"bosna",
+		"banda"
 	]
 	beg_with = {
-		"sportv"    : "Esportes",
-		"fox sport" : "Esportes",
-		"foxsport"  : "Esportes",
-		"combate"   : "Esportes",
-		"espn"      : "Esportes",
-		"premiere"  : "Esportes",
-		"esporte"   : "Esportes",
+		"sportv"     : "Esportes",
+		"fox sport"  : "Esportes",
+		"fox sports" : "Esportes",
+		"foxsport"   : "Esportes",
+		"combate"    : "Esportes",
+		"espn"       : "Esportes",
+		"premiere"   : "Esportes",
+		"esporte"    : "Esportes",
 
 		"telecine"         : "Filmes",
 		"megapix"          : "Filmes",
@@ -387,7 +389,10 @@ if __name__ == "__main__":
 
 		file.write("#EXTM3U\n\n")
 		file.write("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"\n\n")
+		file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\", Bergamota List\nhttp://0.0.0.0\n\n")
 		file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\", Atualizada em: " + dthr + "\nhttp://0.0.0.0\n\n")
+		file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\", Lista grátis (e sempre será)\nhttp://0.0.0.0\n\n")
+		file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\", License: " + now.strftime("%Y") + " WTFPL – Do What the Fuck You Want to Public License. \nhttp://0.0.0.0\n\n")
 
 		for i in all_canais:
 			for j in i:
