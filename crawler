@@ -396,8 +396,8 @@ if __name__ == "__main__":
 
         file.write("#EXTM3U\n\n")
         file.write("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"\n\n")
-        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\", Bergamota List\nhttp://0.0.0.0\n\n")
-        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\", Atualizada em: " + dthr + "\nhttp://0.0.0.0\n\n")
+        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Bergamota List\nhttp://0.0.0.0\n\n")
+        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Atualizada em: " + dthr + "\nhttp://0.0.0.0\n\n")
 
         for i in all_canais:
             for j in i:
