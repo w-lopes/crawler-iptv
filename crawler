@@ -100,6 +100,7 @@ class Crawler:
         name  = name if len(name) and "#" not in name else re.sub(".*,", "", line).strip()
         logo  = logo if validators.url(logo) else ""
         group = ""
+        name  = re.sub("(\(.*)|(\[.*)", "", name).strip()
 
         for i in black_list:
             if i in name.lower() or i in url.lower():
@@ -114,7 +115,7 @@ class Crawler:
             return;
 
         try:
-            if (url in all_urls) or len(all_canais[group][name]) > 4:
+            if (url in all_urls) or len(all_canais[group][name]) > 3:
                 print("\t[\033[93mDUP\033[0m]", name.upper())
                 return
         except:
@@ -164,10 +165,6 @@ class Crawler:
                 all_canais[group][name]
             except KeyError:
                 all_canais[group][name] = []
-
-            if len(all_canais[group][name]) > 2:
-                global_lock.release()
-                return True
 
             all_canais[group][name].append({
                 "logo" : logo,
