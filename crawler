@@ -98,7 +98,7 @@ class Crawler:
         name  = self._getExtInfo(line, "tvg-name").strip()
 
         name  = name if len(name) and "#" not in name else re.sub(".*,", "", line).strip()
-        logo  = logo if validators.url(logo) else ""
+        logo  = logo if validators.url(logo) else "http://bit.ly/bergamota-logo-small"
         group = ""
         name  = re.sub("(\(.*)|(\[.*)", "", name).strip()
 
