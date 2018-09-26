@@ -218,6 +218,9 @@ if __name__ == "__main__":
         "fox family",
         "fox cinema",
         "fox 23",
+        "fox 29",
+        "fox 31",
+        "fox 32",
         "fox 5",
         "estados unidos",
         "premiun",
@@ -255,7 +258,9 @@ if __name__ == "__main__":
         "lab",
         "science",
         "/ru/",
-        "/en/"
+        "/en/",
+        "tvgeral",
+        "akamaihd"
     ]
     beg_with = {
         "sportv"             : "Esportes",
