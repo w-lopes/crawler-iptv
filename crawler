@@ -11,406 +11,409 @@ import time
 import validators
 
 class Crawler:
-	"""
-	Classe para 'crawlear' os sites.
-	"""
+    """
+    Classe para 'crawlear' os sites.
+    """
 
-	links = [
-		"listasiptvgratis"
-	]
+    links = [
+        "listasiptvgratis"
+    ]
 
-	file_name_m3u = "bergamota.m3u"
-	file_name_m3u_tmp = "bergamota.tmp"
+    file_name_m3u = "bergamota.m3u"
+    file_name_m3u_tmp = "bergamota.tmp"
 
-	def listasiptvgratis(self):
-		"""
-		Crawling para o site 'https://listasiptvgratis.com/'.
+    def listasiptvgratis(self):
+        """
+        Crawling para o site 'https://listasiptvgratis.com/'.
 
-		Returns:
-			str[]: Links coletados do site
-		"""
-		content = self._getLinkLines("https://listasiptvgratis.com/", True)
-		links   = []
-		valids  = [i for j in (range(21, 31), range(84, 94)) for i in j]
-		counter = 0
-		for line in content:
-			if "data-clipboard-text" not in line:
-				continue
-			counter += 1
-			if counter not in valids:
-				continue
-			links.append(re.sub("\".*", "", re.sub(".*data-clipboard-text=\"", "", line)))
-		return links
-
-
-	def _getLinkLines(self, link, split=False):
-		"""
-		Retorna o conteudo de uma link splitado por quebra de linha.
-
-		Args:
-			link (str): Link para coletar o conteudo
-
-		Returns:
-			str[]: Linhas coletadas
-		"""
-		headers  = {
-			"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36",
-			"Connection" : "close"
-		}
-		try:
-			sess     = requests.Session()
-			response = sess.get(link, headers=headers, timeout=5)
-			sess.close()
-			del sess
-			if split:
-				return re.sub("\r", "", response.text).split("\n")
-			else:
-				return re.sub("\r", "", response.text)
-		except:
-			return []
+        Returns:
+            str[]: Links coletados do site
+        """
+        content = self._getLinkLines("https://listasiptvgratis.com/", True)
+        links   = []
+        valids  = [i for j in (range(21, 31), range(84, 94)) for i in j]
+        counter = 0
+        for line in content:
+            if "data-clipboard-text" not in line:
+                continue
+            counter += 1
+            if counter not in valids:
+                continue
+            links.append(re.sub("\".*", "", re.sub(".*data-clipboard-text=\"", "", line)))
+        return links
 
 
-	def _getExtInfo(self, line, info):
-		return re.sub("\".*", "", re.sub(".*" + info + "=\"", "", line))
+    def _getLinkLines(self, link, split=False):
+        """
+        Retorna o conteudo de uma link splitado por quebra de linha.
+
+        Args:
+            link (str): Link para coletar o conteudo
+
+        Returns:
+            str[]: Linhas coletadas
+        """
+        headers  = {
+            "User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36",
+            "Connection" : "close"
+        }
+        try:
+            sess     = requests.Session()
+            response = sess.get(link, headers=headers, timeout=5)
+            sess.close()
+            del sess
+            if split:
+                return re.sub("\r", "", response.text).split("\n")
+            else:
+                return re.sub("\r", "", response.text)
+        except:
+            return []
 
 
-	def _threadParseList(self, link):
-		print("Downloading list:", link)
-		lines = self._getLinkLines(link)
-		if len(lines) > 1 * 1024 * 1024:
-			print("\t[\033[91mSIZE\033[0m]", link)
-			return
-		if lines:
-			re.sub("(#EXTINF.*\n)(http.*\n)", self._regExCallback, lines)
-
-	def _regExCallback(self, match):
-
-		all      = match.group(0).strip().split("\n")
-		line     = all[0]
-		url      = all[1]
-		headers  = {
-			"User-Agent"    : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36",
-			"Connection"    : "close",
-			"Cache-Control" : "no-cache"
-		}
-
-		logo  = self._getExtInfo(line, "tvg-logo").strip()
-		name  = self._getExtInfo(line, "tvg-name").strip()
-
-		name  = name if len(name) and "#" not in name else re.sub(".*,", "", line).strip()
-		logo  = logo if validators.url(logo) else ""
-		group = ""
-
-		for i in black_list:
-			if i in name.lower() or i in url.lower():
-				return
-
-		for attr, value in beg_with.items():
-			if name.lower().startswith(attr):
-				group = value
-				break
-
-		if not group:
-			return;
-
-		try:
-			if (url in all_urls) or len(all_canais[group][name]) > 4:
-				print("\t[\033[93mDUP\033[0m]", name.upper())
-				return
-		except:
-			pass
-
-		if not validators.url(url):
-			return
-
-		try:
-			sess   = requests.Session()
-			req    = sess.get(url, headers=headers, stream=True, timeout=3)
-			status = req.status_code
-			sess.close()
-			del sess, req
-		except:
-			print("\t[\033[91mOFF\033[0m] (Timeout)", name)
-			return
-
-		if ".m3u" not in url and ".ts" not in url:
-			return
-
-		if status > 400:
-			print("\t[\033[91mOFF\033[0m][", status, "]: ", name)
-			return
-
-		print("\t[\033[92mON\033[0m] \033[1;30m(", group, ")\033[0m[", status, "]: ", name)
-		self.appendSource(name, logo, group, url)
+    def _getExtInfo(self, line, info):
+        return re.sub("\".*", "", re.sub(".*" + info + "=\"", "", line))
 
 
-	def appendSource(self, name, logo, group, url):
-		while global_lock.locked():
-			time.sleep(30/1000000)
-			continue
+    def _threadParseList(self, link):
+        print("Downloading list:", link)
+        lines = self._getLinkLines(link)
+        if len(lines) > 1 * 1024 * 1024:
+            print("\t[\033[91mSIZE\033[0m]", link)
+            return
+        if lines:
+            re.sub("(#EXTINF.*\n)(http.*\n)", self._regExCallback, lines)
 
-		global_lock.acquire()
+    def _regExCallback(self, match):
 
-		try:
-			name  = name.upper()
-			group = group.upper()
+        all      = match.group(0).strip().split("\n")
+        line     = all[0]
+        url      = all[1]
+        headers  = {
+            "User-Agent"    : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36",
+            "Connection"    : "close",
+            "Cache-Control" : "no-cache"
+        }
 
-			try:
-				all_canais[group]
-			except KeyError:
-				all_canais[group] = {}
+        logo  = self._getExtInfo(line, "tvg-logo").strip()
+        name  = self._getExtInfo(line, "tvg-name").strip()
 
-			try:
-				all_canais[group][name]
-			except KeyError:
-				all_canais[group][name] = []
+        name  = name if len(name) and "#" not in name else re.sub(".*,", "", line).strip()
+        logo  = logo if validators.url(logo) else ""
+        group = ""
 
-			if len(all_canais[group][name]) > 3:
-				global_lock.release()
-				return True
+        for i in black_list:
+            if i in name.lower() or i in url.lower():
+                return
 
-			all_canais[group][name].append({
-				"logo" : logo,
-				"url"  : url
-			})
-			all_urls.append(url)
-		except:
-			pass
+        for attr, value in beg_with.items():
+            if name.lower().startswith(attr):
+                group = value
+                break
 
-		global_lock.release()
-		return True
+        if not group:
+            return;
 
-	def ksort(self, d):
-		return [{k: d[k]} for k in sorted(d.keys())]
+        try:
+            if (url in all_urls) or len(all_canais[group][name]) > 4:
+                print("\t[\033[93mDUP\033[0m]", name.upper())
+                return
+        except:
+            pass
+
+        if not validators.url(url):
+            return
+
+        try:
+            sess   = requests.Session()
+            req    = sess.get(url, headers=headers, stream=True, timeout=3)
+            status = req.status_code
+            sess.close()
+            del sess, req
+        except:
+            print("\t[\033[91mOFF\033[0m] (Timeout)", name)
+            return
+
+        if ".m3u" not in url and ".ts" not in url:
+            return
+
+        if status > 400:
+            print("\t[\033[91mOFF\033[0m][", status, "]: ", name)
+            return
+
+        print("\t[\033[92mON\033[0m] \033[1;30m(", group, ")\033[0m[", status, "]: ", name)
+        self.appendSource(name, logo, group, url)
+
+
+    def appendSource(self, name, logo, group, url):
+        while global_lock.locked():
+            time.sleep(30/1000000)
+            continue
+
+        global_lock.acquire()
+
+        try:
+            name  = name.upper()
+            group = group.upper()
+
+            try:
+                all_canais[group]
+            except KeyError:
+                all_canais[group] = {}
+
+            try:
+                all_canais[group][name]
+            except KeyError:
+                all_canais[group][name] = []
+
+            if len(all_canais[group][name]) > 2:
+                global_lock.release()
+                return True
+
+            all_canais[group][name].append({
+                "logo" : logo,
+                "url"  : url
+            })
+            all_urls.append(url)
+        except:
+            pass
+
+        global_lock.release()
+        return True
+
+    def ksort(self, d):
+        return [{k: d[k]} for k in sorted(d.keys())]
 
 
 if __name__ == "__main__":
 
-	black_list = [
-		"bergamota",
-		"canales",
-		"chile",
-		"infantiles",
-		"peliculas",
-		"ecuador",
-		"mexico",
-		"calidad",
-		"espan",
-		"españ",
-		"nuestra",
-		"camara",
-		"câmara",
-		"latino",
-		"suiza",
-		"collage",
-		"usa",
-		"sur",
-		"business",
-		"atlanta",
-		"sexta",
-		"spain",
-		"privada",
-		"inernacional",
-		"classic",
-		"fox comedy",
-		"fox premium",
-		"fox action",
-		"fox family",
-		"fox cinema",
-		"fox 23",
-		"fox 5",
-		"estados unidos",
-		"premiun",
-		"manipuladora",
-		"interior",
-		"no audio",
-		"noaudio",
-		"radio",
-		"mtv rocks",
-		"mtv dance",
-		"mtv live",
-		"mtv hits",
-		"japan",
-		"russia",
-		"uk",
-		"fm",
-		"internacion",
-		"kosova",
-		"clipes",
-		"band pa",
-		"banda max",
-		"record mt",
-		"nordeste",
-		"goias",
-		"portugal",
-		"água boa",
-		"agua boa",
-		"record pt",
-		"signature",
-		"angola",
-		"sucesso",
-		"bosna",
-		"banda"
-	]
-	beg_with = {
-		"sportv"     : "Esportes",
-		"fox sport"  : "Esportes",
-		"fox sports" : "Esportes",
-		"foxsport"   : "Esportes",
-		"combate"    : "Esportes",
-		"espn"       : "Esportes",
-		"premiere"   : "Esportes",
-		"esporte"    : "Esportes",
+    black_list = [
+        "bergamota",
+        "canales",
+        "chile",
+        "infantiles",
+        "peliculas",
+        "ecuador",
+        "mexico",
+        "calidad",
+        "espan",
+        "españ",
+        "nuestra",
+        "camara",
+        "câmara",
+        "latino",
+        "suiza",
+        "collage",
+        "usa",
+        "sur",
+        "business",
+        "atlanta",
+        "sexta",
+        "spain",
+        "privada",
+        "inernacional",
+        "classic",
+        "fox comedy",
+        "fox premium",
+        "fox action",
+        "fox family",
+        "fox cinema",
+        "fox 23",
+        "fox 5",
+        "estados unidos",
+        "premiun",
+        "manipuladora",
+        "interior",
+        "no audio",
+        "noaudio",
+        "radio",
+        "mtv rocks",
+        "mtv dance",
+        "mtv live",
+        "mtv hits",
+        "japan",
+        "russia",
+        "uk",
+        "fm",
+        "internacion",
+        "kosova",
+        "clipes",
+        "band pa",
+        "banda max",
+        "record mt",
+        "nordeste",
+        "goias",
+        "portugal",
+        "água boa",
+        "agua boa",
+        "record pt",
+        "signature",
+        "angola",
+        "sucesso",
+        "bosna",
+        "norge",
+        "banda",
+        "lab",
+        "science",
+        "/ru/",
+        "/en/"
+    ]
+    beg_with = {
+        "sportv"             : "Esportes",
+        "fox sport"          : "Esportes",
+        "fox sports"         : "Esportes",
+        "foxsport"           : "Esportes",
+        "combate"            : "Esportes",
+        "espn"               : "Esportes",
+        "premiere"           : "Esportes",
+        "esporte interativo" : "Esportes",
 
-		"telecine"         : "Filmes",
-		"megapix"          : "Filmes",
-		"hbo"              : "Filmes",
-		"studio universal" : "Filmes",
-		"space"            : "Filmes",
-		"max"              : "Filmes",
-		"paramount"        : "Filmes",
-		"band sport"       : "Filmes",
+        "telecine"         : "Filmes",
+        "megapix"          : "Filmes",
+        "hbo"              : "Filmes",
+        "studio universal" : "Filmes",
+        "space"            : "Filmes",
+        "max"              : "Filmes",
+        "paramount"        : "Filmes",
+        "band sport"       : "Filmes",
 
-		"universal" : "Séries",
-		"fox"       : "Séries",
-		"fx"        : "Séries",
-		"warner"    : "Séries",
-		"sony"      : "Séries",
-		"syfy"      : "Séries",
-		"tnt"       : "Séries",
-		"axn"       : "Séries",
-		"amc"       : "Séries",
-		"a&e"       : "Séries",
-		"tbs"       : "Séries",
+        "universal" : "Séries",
+        "fox"       : "Séries",
+        "fx"        : "Séries",
+        "warner"    : "Séries",
+        "sony"      : "Séries",
+        "syfy"      : "Séries",
+        "tnt"       : "Séries",
+        "axn"       : "Séries",
+        "amc"       : "Séries",
+        "a&e"       : "Séries",
+        "tbs"       : "Séries",
 
-		"cartoon"        : "Infantis",
-		"nick"           : "Infantis",
-		"disney"         : "Infantis",
-		"gloob"          : "Infantis",
-		"natgeokids"     : "Infantis",
-		"natgeo kids"    : "Infantis",
-		"nat geo kids"   : "Infantis",
-		"tooncast"       : "Infantis",
-		"discovery kids" : "Infantis",
-		"boomerang"      : "Infantis",
+        "cartoon"        : "Infantis",
+        "nick"           : "Infantis",
+        "disney"         : "Infantis",
+        "gloob"          : "Infantis",
+        "natgeokids"     : "Infantis",
+        "natgeo kids"    : "Infantis",
+        "nat geo kids"   : "Infantis",
+        "tooncast"       : "Infantis",
+        "discovery kids" : "Infantis",
+        "boomerang"      : "Infantis",
 
-		"discovery"           : "Documentários",
-		"natgeo"              : "Documentários",
-		"national geographic" : "Documentários",
-		"animal planet"       : "Documentários",
-		"history"             : "Documentários",
-		"h2"                  : "Documentários",
-		"investigacao"        : "Documentários",
-		"investigação"        : "Documentários",
-		"home & health"       : "Documentários",
-		"home&health"         : "Documentários",
-		"h&h"                 : "Documentários",
+        "discovery"           : "Documentários",
+        "natgeo"              : "Documentários",
+        "national geographic" : "Documentários",
+        "animal planet"       : "Documentários",
+        "history"             : "Documentários",
+        "h2"                  : "Documentários",
+        "investigacao"        : "Documentários",
+        "investigação"        : "Documentários",
+        "home & health"       : "Documentários",
+        "home&health"         : "Documentários",
+        "h&h"                 : "Documentários",
 
-		"gnt"            : "Variedades",
-		"mtv"            : "Variedades",
-		"multishow"      : "Variedades",
-		"comedy central" : "Variedades",
-		"tru tv"         : "Variedades",
-		"trutv"          : "Variedades",
+        "gnt"            : "Variedades",
+        "mtv"            : "Variedades",
+        "multishow"      : "Variedades",
+        "comedy central" : "Variedades",
+        "tru tv"         : "Variedades",
+        "trutv"          : "Variedades",
 
-		"globo news"   : "Notícias",
-		"band news"    : "Notícias",
-		"record news"  : "Notícias",
+        "globo news"   : "Notícias",
+        "band news"    : "Notícias",
+        "record news"  : "Notícias",
 
-		"globo sp"  : "Abertos",
-		"globo rj"  : "Abertos",
-		"globo rbs" : "Abertos",
-		"sbt sp"    : "Abertos",
-		"sbt rs"    : "Abertos",
-		"record"    : "Abertos",
-		"band"      : "Abertos",
-		"futura"    : "Abertos",
-		"cultura"   : "Abertos",
+        "globo sp"  : "Abertos",
+        "globo rj"  : "Abertos",
+        "globo rbs" : "Abertos",
+        "sbt sp"    : "Abertos",
+        "sbt rs"    : "Abertos",
+        "record"    : "Abertos",
+        "band"      : "Abertos",
+        "futura"    : "Abertos",
+        "cultura"   : "Abertos",
 
-		# "playboy"  : "Adultos +18",
-		# "sexyhot"  : "Adultos +18",
-		# "venus"    : "Adultos +18",
-		# "miami tv" : "Adultos +18",
-		# "miamitv"  : "Adultos +18",
-		# "jasmine"  : "Adultos +18"
-	}
+        # "playboy"  : "Adultos +18",
+        # "sexyhot"  : "Adultos +18",
+        # "venus"    : "Adultos +18",
+        # "miami tv" : "Adultos +18",
+        # "miamitv"  : "Adultos +18",
+        # "jasmine"  : "Adultos +18"
+    }
 
-	all_urls   = []
-	all_names  = {}
-	all_canais = {}
+    all_urls   = []
+    all_names  = {}
+    all_canais = {}
 
-	try:
-		global_lock = threading.Lock()
-		links       = Crawler()
-		threads     = []
-		now         = datetime.datetime.now()
-		dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
-		path        = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-		all         = [
-			"https://bit.ly/faustinotv",
-			"https://tinyurl.com/CANAISGLAU",
-			"https://tinyurl.com/ESPORTEGLAU",
-			"https://tinyurl.com/DOCUMENTARIOSGLAU",
-			"http://minhalista.live/LANNNN",
-			"http://bit.ly/Will-Canais"
-		]
+    try:
+        global_lock = threading.Lock()
+        links       = Crawler()
+        threads     = []
+        now         = datetime.datetime.now()
+        dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
+        path        = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+        all         = [
+            "https://bit.ly/faustinotv",
+            "https://tinyurl.com/CANAISGLAU",
+            "https://tinyurl.com/ESPORTEGLAU",
+            "https://tinyurl.com/DOCUMENTARIOSGLAU",
+            "http://minhalista.live/LANNNN",
+            "http://bit.ly/Will-Canais"
+        ]
 
-		for i in links.links:
-			print("Collecting from", i)
-			crawl = getattr(links, i)
-			all  += crawl()
+        for i in links.links:
+            print("Collecting from", i)
+            crawl = getattr(links, i)
+            all  += crawl()
 
-		all = list(set(all))
+        all = list(set(all))
 
-		for link in all:
-			t = threading.Thread(target=links._threadParseList, args=(link,))
-			t.start()
-			threads.append(t)
+        for link in all:
+            t = threading.Thread(target=links._threadParseList, args=(link,))
+            t.start()
+            threads.append(t)
 
-		for t in threads:
-			t.join()
-	except (KeyboardInterrupt, SystemExit):
-		print("Exiting")
-	except Exception as e:
-		print("Exception", e)
-		pass
+        for t in threads:
+            t.join()
+    except (KeyboardInterrupt, SystemExit):
+        print("Exiting")
+    except Exception as e:
+        print("Exception", e)
+        pass
 
-	path       = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-	temp_file  = os.path.join(path, links.file_name_m3u_tmp)
-	m3u_file   = os.path.join(path, links.file_name_m3u)
-	all_canais = links.ksort(all_canais)
+    path       = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+    temp_file  = os.path.join(path, links.file_name_m3u_tmp)
+    m3u_file   = os.path.join(path, links.file_name_m3u)
+    all_canais = links.ksort(all_canais)
 
-	print("Cleaning temp file")
-	if os.path.exists(temp_file):
-		os.remove(temp_file)
+    print("Cleaning temp file")
+    if os.path.exists(temp_file):
+        os.remove(temp_file)
 
-	print("Creating temp file")
-	with open(temp_file, "a+") as file:
+    print("Creating temp file")
+    with open(temp_file, "a+") as file:
 
-		file.write("#EXTM3U\n\n")
-		file.write("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"\n\n")
-		file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\", Bergamota List\nhttp://0.0.0.0\n\n")
-		file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\", Atualizada em: " + dthr + "\nhttp://0.0.0.0\n\n")
-		file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\", Lista grátis (e sempre será)\nhttp://0.0.0.0\n\n")
-		file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\", License: " + now.strftime("%Y") + " WTFPL – Do What the Fuck You Want to Public License. \nhttp://0.0.0.0\n\n")
+        file.write("#EXTM3U\n\n")
+        file.write("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"\n\n")
+        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\", Bergamota List\nhttp://0.0.0.0\n\n")
+        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\", Atualizada em: " + dthr + "\nhttp://0.0.0.0\n\n")
 
-		for i in all_canais:
-			for j in i:
-				ord_canais = links.ksort(i[j])
-				for k in ord_canais:
-					for l in k:
-						for m in k:
-							for n in k[m]:
-								file.write("#EXTINF:-1 tvg-name=\"%s\" tvg-logo=\"%s\" group-title=\"%s\",%s\n%s\n\n" % (
-									m,
-									n["logo"],
-									j,
-									m,
-									n["url"]
-								))
+        for i in all_canais:
+            for j in i:
+                ord_canais = links.ksort(i[j])
+                for k in ord_canais:
+                    for l in k:
+                        for m in k:
+                            for n in k[m]:
+                                file.write("#EXTINF:-1 tvg-name=\"%s\" tvg-logo=\"%s\" group-title=\"%s\",%s\n%s\n\n" % (
+                                    m,
+                                    n["logo"],
+                                    j,
+                                    m,
+                                    n["url"]
+                                ))
 
-	print("Creating m3u file")
-	os.rename(temp_file, m3u_file)
+    print("Creating m3u file")
+    os.rename(temp_file, m3u_file)
 
-	print("Done")
+    print("Done")
 
