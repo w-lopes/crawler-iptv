@@ -1,0 +1,9 @@
+<Files "crawler">
+	Order Allow,Deny
+	Deny from all
+</Files>
+
+<Files ~ "\.php$">
+	Order allow,deny
+	Deny from all
+</Files>
