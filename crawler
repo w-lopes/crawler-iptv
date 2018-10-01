@@ -10,25 +10,42 @@ import threading
 import time
 import validators
 
+from googleapiclient.discovery import build
+
 class Crawler:
-    """
-    Classe para 'crawlear' os sites.
-    """
 
     links = [
+        "minhalistalive",
+        "googlepastebin",
         "listasiptvgratis"
     ]
 
     file_name_m3u = "bergamota.m3u"
     file_name_m3u_tmp = "bergamota.tmp"
 
-    def listasiptvgratis(self):
-        """
-        Crawling para o site 'https://listasiptvgratis.com/'.
+    def minhalistalive(self):
+        links = []
+        page  = self._getLinkLines("https://minhalista.live/listas-iptv/mais-populares", True, 30)
+        for line in page:
+            if "btn-primary" not in line:
+                continue
+            links.append(re.sub("(.*href=\")|(listas-iptv\/)|(\"\sclass.*)", "", line))
+        return links
 
-        Returns:
-            str[]: Links coletados do site
-        """
+    def googlepastebin(self):
+        links = []
+        service = build("customsearch", "v1", developerKey="AIzaSyC1uUnvc3dMHgM_JbCxOM5Pj0lU7moxFo4")
+        res = service.cse().list(
+            q=["extm3u", "brasil"],
+            cx="013227457599740062995:m4jg7xrozow",
+            sort="date"
+        ).execute()
+
+        for result in res["items"]:
+            links.append(re.sub(".com/", ".com/raw/", result["formattedUrl"]))
+        return links
+
+    def listasiptvgratis(self):
         content = self._getLinkLines("https://listasiptvgratis.com/", True)
         links   = []
         valids  = [i for j in (range(21, 31), range(84, 94)) for i in j]
@@ -43,23 +60,14 @@ class Crawler:
         return links
 
 
-    def _getLinkLines(self, link, split=False):
-        """
-        Retorna o conteudo de uma link splitado por quebra de linha.
-
-        Args:
-            link (str): Link para coletar o conteudo
-
-        Returns:
-            str[]: Linhas coletadas
-        """
+    def _getLinkLines(self, link, split=False, timeout=5):
         headers  = {
             "User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36",
             "Connection" : "close"
         }
         try:
             sess     = requests.Session()
-            response = sess.get(link, headers=headers, timeout=5)
+            response = sess.get(link, headers=headers, timeout=timeout)
             sess.close()
             del sess
             if split:
@@ -67,6 +75,7 @@ class Crawler:
             else:
                 return re.sub("\r", "", response.text)
         except:
+            print("Fail to collect from", link)
             return []
 
 
@@ -261,14 +270,13 @@ if __name__ == "__main__":
         "tvpremiumhd"
     ]
     beg_with = {
-        "sportv"             : "Esportes",
-        "fox sport"          : "Esportes",
-        "fox sports"         : "Esportes",
-        "foxsport"           : "Esportes",
-        "combate"            : "Esportes",
-        "espn"               : "Esportes",
-        "premiere"           : "Esportes",
-        "esporte interativo" : "Esportes",
+        "sportv"     : "Esportes",
+        "fox sport"  : "Esportes",
+        "fox sports" : "Esportes",
+        "foxsport"   : "Esportes",
+        "combate"    : "Esportes",
+        "espn"       : "Esportes",
+        "premiere"   : "Esportes",
 
         "telecine"         : "Filmes",
         "megapix"          : "Filmes",
@@ -336,6 +344,7 @@ if __name__ == "__main__":
         "cultura"   : "Abertos",
 
         # "playboy"  : "Adultos +18",
+        # "hustle"   : "Adultos +18",
         # "sexyhot"  : "Adultos +18",
         # "venus"    : "Adultos +18",
         # "miami tv" : "Adultos +18",
@@ -368,6 +377,11 @@ if __name__ == "__main__":
             crawl = getattr(links, i)
             all  += crawl()
 
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(all)
+        sys.exit(0)
+
         all = list(set(all))
 
         for link in all:
@@ -383,42 +397,42 @@ if __name__ == "__main__":
         print("Exception", e)
         pass
 
-    path       = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    temp_file  = os.path.join(path, links.file_name_m3u_tmp)
-    m3u_file   = os.path.join(path, links.file_name_m3u)
-    all_canais = links.ksort(all_canais)
+    # path       = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+    # temp_file  = os.path.join(path, links.file_name_m3u_tmp)
+    # m3u_file   = os.path.join(path, links.file_name_m3u)
+    # all_canais = links.ksort(all_canais)
 
-    print("Cleaning temp file")
-    if os.path.exists(temp_file):
-        os.remove(temp_file)
+    # print("Cleaning temp file")
+    # if os.path.exists(temp_file):
+    #     os.remove(temp_file)
 
-    print("Creating temp file")
-    with open(temp_file, "a+") as file:
+    # print("Creating temp file")
+    # with open(temp_file, "a+") as file:
 
-        file.write("#EXTM3U\n\n")
-        file.write("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"\n\n")
-        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Bergamota List\nhttp://0.0.0.0\n\n")
-        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Atualizada em: " + dthr + "\nhttp://0.0.0.0\n\n")
-        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Ajude a manter a lista\nhttp://0.0.0.0\n\n")
-        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", bit.ly/doar-iptv\nhttp://0.0.0.0\n\n")
+    #     file.write("#EXTM3U\n\n")
+    #     file.write("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"\n\n")
+    #     file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Bergamota List\nhttp://0.0.0.0\n\n")
+    #     file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Atualizada em: " + dthr + "\nhttp://0.0.0.0\n\n")
+    #     file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Ajude a manter a lista\nhttp://0.0.0.0\n\n")
+    #     file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", bit.ly/doar-iptv\nhttp://0.0.0.0\n\n")
 
-        for i in all_canais:
-            for j in i:
-                ord_canais = links.ksort(i[j])
-                for k in ord_canais:
-                    for l in k:
-                        for m in k:
-                            for n in k[m]:
-                                file.write("#EXTINF:-1 tvg-name=\"%s\" tvg-logo=\"%s\" group-title=\"%s\",%s\n%s\n\n" % (
-                                    m,
-                                    n["logo"],
-                                    j,
-                                    m,
-                                    n["url"]
-                                ))
+    #     for i in all_canais:
+    #         for j in i:
+    #             ord_canais = links.ksort(i[j])
+    #             for k in ord_canais:
+    #                 for l in k:
+    #                     for m in k:
+    #                         for n in k[m]:
+    #                             file.write("#EXTINF:-1 tvg-name=\"%s\" tvg-logo=\"%s\" group-title=\"%s\",%s\n%s\n\n" % (
+    #                                 m,
+    #                                 n["logo"],
+    #                                 j,
+    #                                 m,
+    #                                 n["url"]
+    #                             ))
 
-    print("Creating m3u file")
-    os.rename(temp_file, m3u_file)
+    # print("Creating m3u file")
+    # os.rename(temp_file, m3u_file)
 
-    print("Done")
+    # print("Done")
 
