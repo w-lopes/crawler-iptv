@@ -323,14 +323,14 @@ if __name__ == "__main__":
 
         "globo news"   : "Notícias",
         "band news"    : "Notícias",
-        "record news"  : "Notícias",
+        # "record news"  : "Notícias",
 
         "globo sp"  : "Abertos",
         "globo rj"  : "Abertos",
         "globo rbs" : "Abertos",
         "sbt sp"    : "Abertos",
         "sbt rs"    : "Abertos",
-        "record"    : "Abertos",
+        "recordsp"  : "Abertos",
         "band"      : "Abertos",
         "futura"    : "Abertos",
         "cultura"   : "Abertos",
