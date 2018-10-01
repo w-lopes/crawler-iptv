@@ -377,11 +377,6 @@ if __name__ == "__main__":
             crawl = getattr(links, i)
             all  += crawl()
 
-        import pprint
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(all)
-        sys.exit(0)
-
         all = list(set(all))
 
         for link in all:
@@ -397,42 +392,42 @@ if __name__ == "__main__":
         print("Exception", e)
         pass
 
-    # path       = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    # temp_file  = os.path.join(path, links.file_name_m3u_tmp)
-    # m3u_file   = os.path.join(path, links.file_name_m3u)
-    # all_canais = links.ksort(all_canais)
+    path       = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
+    temp_file  = os.path.join(path, links.file_name_m3u_tmp)
+    m3u_file   = os.path.join(path, links.file_name_m3u)
+    all_canais = links.ksort(all_canais)
 
-    # print("Cleaning temp file")
-    # if os.path.exists(temp_file):
-    #     os.remove(temp_file)
+    print("Cleaning temp file")
+    if os.path.exists(temp_file):
+        os.remove(temp_file)
 
-    # print("Creating temp file")
-    # with open(temp_file, "a+") as file:
+    print("Creating temp file")
+    with open(temp_file, "a+") as file:
 
-    #     file.write("#EXTM3U\n\n")
-    #     file.write("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"\n\n")
-    #     file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Bergamota List\nhttp://0.0.0.0\n\n")
-    #     file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Atualizada em: " + dthr + "\nhttp://0.0.0.0\n\n")
-    #     file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Ajude a manter a lista\nhttp://0.0.0.0\n\n")
-    #     file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", bit.ly/doar-iptv\nhttp://0.0.0.0\n\n")
+        file.write("#EXTM3U\n\n")
+        file.write("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"\n\n")
+        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Bergamota List\nhttp://0.0.0.0\n\n")
+        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Atualizada em: " + dthr + "\nhttp://0.0.0.0\n\n")
+        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Ajude a manter a lista\nhttp://0.0.0.0\n\n")
+        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", bit.ly/doar-iptv\nhttp://0.0.0.0\n\n")
 
-    #     for i in all_canais:
-    #         for j in i:
-    #             ord_canais = links.ksort(i[j])
-    #             for k in ord_canais:
-    #                 for l in k:
-    #                     for m in k:
-    #                         for n in k[m]:
-    #                             file.write("#EXTINF:-1 tvg-name=\"%s\" tvg-logo=\"%s\" group-title=\"%s\",%s\n%s\n\n" % (
-    #                                 m,
-    #                                 n["logo"],
-    #                                 j,
-    #                                 m,
-    #                                 n["url"]
-    #                             ))
+        for i in all_canais:
+            for j in i:
+                ord_canais = links.ksort(i[j])
+                for k in ord_canais:
+                    for l in k:
+                        for m in k:
+                            for n in k[m]:
+                                file.write("#EXTINF:-1 tvg-name=\"%s\" tvg-logo=\"%s\" group-title=\"%s\",%s\n%s\n\n" % (
+                                    m,
+                                    n["logo"],
+                                    j,
+                                    m,
+                                    n["url"]
+                                ))
 
-    # print("Creating m3u file")
-    # os.rename(temp_file, m3u_file)
+    print("Creating m3u file")
+    os.rename(temp_file, m3u_file)
 
-    # print("Done")
+    print("Done")
 
