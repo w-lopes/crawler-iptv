@@ -24,8 +24,11 @@ class Crawler:
     file_name_m3u_tmp = "bergamota.tmp"
 
     def minhalistalive(self):
-        links = []
-        page  = self._getLinkLines("https://minhalista.live/listas-iptv/mais-populares", True, 30)
+        links  = []
+        page   = self._getLinkLines("https://minhalista.live/listas-iptv/mais-populares", True, 60)
+        page  += self._getLinkLines("https://minhalista.live/listas-iptv/atualizadas", True, 60)
+        for i in range(2, 5):
+            page  += self._getLinkLines("https://minhalista.live/listas-iptv/atualizadas?page=%s" % (i), True, 60)
         for line in page:
             if "btn-primary" not in line:
                 continue
@@ -343,13 +346,13 @@ if __name__ == "__main__":
         "futura"    : "Abertos",
         "cultura"   : "Abertos",
 
-        # "playboy"  : "Adultos +18",
-        # "hustle"   : "Adultos +18",
-        # "sexyhot"  : "Adultos +18",
-        # "venus"    : "Adultos +18",
-        # "miami tv" : "Adultos +18",
-        # "miamitv"  : "Adultos +18",
-        # "jasmine"  : "Adultos +18"
+        "playboy"  : "x Adultos +18",
+        "hustle"   : "x Adultos +18",
+        "sexyhot"  : "x Adultos +18",
+        "venus"    : "x Adultos +18",
+        "miami tv" : "x Adultos +18",
+        "miamitv"  : "x Adultos +18",
+        "jasmine"  : "x Adultos +18"
     }
 
     all_urls   = []
