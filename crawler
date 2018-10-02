@@ -346,15 +346,13 @@ if __name__ == "__main__":
         "futura"    : "Abertos",
         "cultura"   : "Abertos",
 
-        """
-        "playboy"  : "x Adultos +18",
-        "hustle"   : "x Adultos +18",
-        "sexyhot"  : "x Adultos +18",
-        "venus"    : "x Adultos +18",
-        "miami tv" : "x Adultos +18",
-        "miamitv"  : "x Adultos +18",
-        "jasmine"  : "x Adultos +18"
-        """
+        # "playboy"  : "x Adultos +18",
+        # "hustle"   : "x Adultos +18",
+        # "sexyhot"  : "x Adultos +18",
+        # "venus"    : "x Adultos +18",
+        # "miami tv" : "x Adultos +18",
+        # "miamitv"  : "x Adultos +18",
+        # "jasmine"  : "x Adultos +18"
     }
 
     all_urls   = []
