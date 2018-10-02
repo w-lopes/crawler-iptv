@@ -272,7 +272,8 @@ if __name__ == "__main__":
         "akamaihd",
         "tvpremiumhd",
         "futeboltvgratis",
-        ":"
+        "cultura:",
+        "nasa"
     ]
     beg_with = {
         "sportv"     : "Esportes",
