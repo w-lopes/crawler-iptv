@@ -361,6 +361,7 @@ if __name__ == "__main__":
         "south park"        : "24 Horas",
         "southpark"         : "24 Horas",
         "simpsons"          : "24 Horas",
+        "os simpsons"       : "24 Horas",
         "chaves"            : "24 Horas",
         "chapolin"          : "24 Horas",
         "naruto"            : "24 Horas",
@@ -372,6 +373,7 @@ if __name__ == "__main__":
         "pernalonga"        : "24 Horas",
         "pica pau"          : "24 Horas",
         "picapau"           : "24 Horas",
+        "eu, a patroa"      : "24 Horas",
 
         # "playboy"  : "x Adultos +18",
         # "hustle"   : "x Adultos +18",
