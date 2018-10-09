@@ -110,10 +110,7 @@ class Crawler:
         name  = self._getExtInfo(line, "tvg-name").strip()
 
         name  = name if len(name) and "#" not in name else re.sub(".*,", "", line).strip()
-        if "minhalista" in logo:
-            logo  = "https://78.media.tumblr.com/avatar_98bf3185c980_128.pnj"
-        else: 
-            logo  = logo if validators.url(logo) else "https://78.media.tumblr.com/avatar_98bf3185c980_128.pnj"
+        logo  = logo if validators.url(logo) else "https://78.media.tumblr.com/avatar_98bf3185c980_128.pnj"
         group = ""
         name  = re.sub("(\(.*)|(\[.*)", "", name).strip()
 
@@ -141,7 +138,7 @@ class Crawler:
 
         try:
             sess   = requests.Session()
-            req    = sess.get(url, headers=headers, stream=True, timeout=3)
+            req    = sess.get(url, headers=headers, stream=True, timeout=5)
             status = req.status_code
             sess.close()
             del sess, req
@@ -374,6 +371,8 @@ if __name__ == "__main__":
         "pica pau"          : "24 Horas",
         "picapau"           : "24 Horas",
         "eu, a patroa"      : "24 Horas",
+        "eu a patroa"       : "24 Horas",
+        "ben 10"            : "24 Horas",
 
         # "playboy"  : "x Adultos +18",
         # "hustle"   : "x Adultos +18",
