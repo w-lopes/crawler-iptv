@@ -273,7 +273,9 @@ if __name__ == "__main__":
         "tvpremiumhd",
         "futeboltvgratis",
         "cultura:",
-        "nasa"
+        "nasa",
+        "turk",
+        "espan"
     ]
     beg_with = {
         "sportv"     : "Esportes",
@@ -334,6 +336,8 @@ if __name__ == "__main__":
         "comedy central" : "Variedades",
         "tru tv"         : "Variedades",
         "trutv"          : "Variedades",
+        "viva"           : "Variedades",
+        "off"            : "Variedades",
 
         "globo news"   : "Notícias",
         "band news"    : "Notícias",
