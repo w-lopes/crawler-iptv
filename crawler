@@ -128,8 +128,8 @@ class Crawler:
 
         try:
             if (url in all_urls) or len(all_canais[group][name]) > 3:
-                print("\t[\033[93mDUP\033[0m]", name.upper())
-                return
+                # print("\t[\033[93mDUP\033[0m]", name.upper())
+                # return
         except:
             pass
 
@@ -339,6 +339,8 @@ if __name__ == "__main__":
         "trutv"          : "Variedades",
         "viva"           : "Variedades",
         "off"            : "Variedades",
+        "canal off"      : "Variedades",
+        "canal viva"     : "Variedades",
 
         "globo news"   : "Notícias",
         "band news"    : "Notícias",
@@ -444,8 +446,8 @@ if __name__ == "__main__":
         file.write("#PLAYLISTV: pltv-name=\"Bergamota list\" pltv-description=\"Lista de canais muito cítrica :)\" pltv-author=\"Bergamota Inc.\"\n\n")
         # file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Bergamota List\nhttp://0.0.0.0\n\n")
         file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Atualizada em: " + dthr + "\nhttp://0.0.0.0\n\n")
-        # file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Ajude a manter a lista\nhttp://0.0.0.0\n\n")
-        # file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", bit.ly/doar-iptv\nhttp://0.0.0.0\n\n")
+        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", Ajude a manter a lista\nhttp://0.0.0.0\n\n")
+        file.write("#EXTINF:-1 tvg-id="" group-title=\"Info\" tvg-logo=\"http://bit.ly/bergamota-logo-small\", bit.ly/doar-iptv\nhttp://0.0.0.0\n\n")
 
         for i in all_canais:
             for j in i:
