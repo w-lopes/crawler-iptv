@@ -126,12 +126,12 @@ class Crawler:
         if not group:
             return;
 
-        try:
-            if (url in all_urls) or len(all_canais[group][name]) > 3:
+        # try:
+            # if (url in all_urls) or len(all_canais[group][name]) > 3:
                 # print("\t[\033[93mDUP\033[0m]", name.upper())
                 # return
-        except:
-            pass
+        # except:
+            # pass
 
         if not validators.url(url):
             return
