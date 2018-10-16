@@ -110,9 +110,13 @@ class Crawler:
         name  = self._getExtInfo(line, "tvg-name").strip()
 
         name  = name if len(name) and "#" not in name else re.sub(".*,", "", line).strip()
-        logo  = logo if validators.url(logo) else "https://78.media.tumblr.com/avatar_98bf3185c980_128.pnj"
         group = ""
-        name  = re.sub("(\(.*)|(\[.*)", "", name).strip()
+        name  = re.sub("(\(.*)|(\[.*)", "", name.replace("*", "")).strip()
+
+        if "minhalista" in logo:
+            logo = "https://78.media.tumblr.com/avatar_98bf3185c980_128.pnj"
+        else:
+            logo = logo if validators.url(logo) else "https://78.media.tumblr.com/avatar_98bf3185c980_128.pnj"
 
         for i in black_list:
             if i in name.lower() or i in url.lower():
@@ -126,19 +130,20 @@ class Crawler:
         if not group:
             return;
 
-        # try:
+        try:
+            if (url in all_urls):
             # if (url in all_urls) or len(all_canais[group][name]) > 3:
-                # print("\t[\033[93mDUP\033[0m]", name.upper())
-                # return
-        # except:
-            # pass
+                print("\t[\033[93mDUP\033[0m]", name.upper())
+                return
+        except:
+            pass
 
         if not validators.url(url):
             return
 
         try:
             sess   = requests.Session()
-            req    = sess.get(url, headers=headers, stream=True, timeout=5)
+            req    = sess.get(url, headers=headers, stream=True, timeout=8)
             status = req.status_code
             sess.close()
             del sess, req
@@ -268,6 +273,7 @@ if __name__ == "__main__":
         "science",
         "/ru/",
         "/en/",
+        "/us/",
         "tvgeral",
         "akamaihd",
         "tvpremiumhd",
@@ -276,25 +282,29 @@ if __name__ == "__main__":
         "nasa",
         "turk",
         "espan",
-        "the air"
+        "the air",
+        "gospel"
     ]
     beg_with = {
-        "sportv"     : "Esportes",
         "fox sport"  : "Esportes",
         "fox sports" : "Esportes",
         "foxsport"   : "Esportes",
         "combate"    : "Esportes",
         "espn"       : "Esportes",
-        "premiere"   : "Esportes",
+        "band sport" : "Esportes",
 
-        "telecine"         : "Filmes",
+        "sportv" : "SporTV",
+
+        "premiere" : "Premiere",
+
+        "telecine" : "Rede telecine",
+
         "megapix"          : "Filmes",
         "hbo"              : "Filmes",
         "studio universal" : "Filmes",
         "space"            : "Filmes",
         "max"              : "Filmes",
         "paramount"        : "Filmes",
-        "band sport"       : "Filmes",
 
         "universal" : "Séries",
         "fox"       : "Séries",
@@ -330,21 +340,25 @@ if __name__ == "__main__":
         "home & health"       : "Documentários",
         "home&health"         : "Documentários",
         "h&h"                 : "Documentários",
+        "tru tv"              : "Documentários",
+        "trutv"               : "Documentários",
 
-        "gnt"            : "Variedades",
         "mtv"            : "Variedades",
-        "multishow"      : "Variedades",
         "comedy central" : "Variedades",
-        "tru tv"         : "Variedades",
-        "trutv"          : "Variedades",
-        "viva"           : "Variedades",
         "off"            : "Variedades",
+        "multishow"      : "Variedades",
         "canal off"      : "Variedades",
+        "viva"           : "Variedades",
         "canal viva"     : "Variedades",
+        "gnt"            : "Variedades",
+        "bis"            : "Variedades",
+        "canal bis"      : "Variedades",
+        "mais globosat"  : "Variedades",
+        "canal brasil"   : "Variedades",
 
         "globo news"   : "Notícias",
         "band news"    : "Notícias",
-        # "record news"  : "Notícias",
+        "record news"  : "Notícias",
 
         "globo sp"  : "Abertos",
         "globo rj"  : "Abertos",
@@ -352,9 +366,15 @@ if __name__ == "__main__":
         "sbt sp"    : "Abertos",
         "sbt rs"    : "Abertos",
         "recordsp"  : "Abertos",
+        "record sp" : "Abertos",
         "band"      : "Abertos",
         "futura"    : "Abertos",
         "cultura"   : "Abertos",
+
+        "bbb"         : "PPV",
+        "big brother" : "PPV",
+        "fazenda"     : "PPV",
+        "a fazenda"   : "PPV",
 
         "bob esponja"       : "24 Horas",
         "scooby doo"        : "24 Horas",
@@ -380,6 +400,8 @@ if __name__ == "__main__":
         "eu, a patroa"      : "24 Horas",
         "eu a patroa"       : "24 Horas",
         "ben 10"            : "24 Horas",
+        "mr bean"           : "24 Horas",
+        "mr. bean"          : "24 Horas",
 
         # "playboy"  : "x Adultos +18",
         # "hustle"   : "x Adultos +18",
