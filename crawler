@@ -361,7 +361,7 @@ if __name__ == "__main__":
 
         "globo news"   : "Notícias",
         "band news"    : "Notícias",
-        "record news"  : "Notícias",
+        # "record news"  : "Notícias",
 
         "globo sp"  : "Abertos",
         "globo rj"  : "Abertos",
