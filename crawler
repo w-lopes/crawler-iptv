@@ -89,9 +89,9 @@ class Crawler:
     def _threadParseList(self, link):
         print("Downloading list:", link)
         lines = self._getLinkLines(link)
-        if len(lines) > 15 * 1024 * 1024:
-            print("\t[\033[91mSIZE\033[0m]", link)
-            return
+        # if len(lines) > 15 * 1024 * 1024:
+        #     print("\t[\033[91mSIZE\033[0m]", link)
+        #     return
         if lines:
             re.sub("(#EXTINF.*\n)(http.*\n)", self._regExCallback, lines)
 
@@ -284,7 +284,8 @@ if __name__ == "__main__":
         "turk",
         "espan",
         "the air",
-        "gospel"
+        "gospel",
+        "pocc"
     ]
     beg_with = {
         "fox sport"  : "Esportes",
@@ -300,24 +301,25 @@ if __name__ == "__main__":
 
         "telecine" : "Rede telecine",
 
-        "megapix"          : "Filmes",
-        "hbo"              : "Filmes",
-        "studio universal" : "Filmes",
-        "space"            : "Filmes",
-        "max"              : "Filmes",
-        "paramount"        : "Filmes",
+        "hbo" : "Rede HBO",
+        "max" : "Rede HBO",
 
-        "universal" : "Séries",
-        "fox"       : "Séries",
-        "fx"        : "Séries",
-        "warner"    : "Séries",
-        "sony"      : "Séries",
-        "syfy"      : "Séries",
-        "tnt"       : "Séries",
-        "axn"       : "Séries",
-        "amc"       : "Séries",
-        "a&e"       : "Séries",
-        "tbs"       : "Séries",
+        "megapix"          : "Filmes/Séries",
+        "studio universal" : "Filmes/Séries",
+        "space"            : "Filmes/Séries",
+        "paramount"        : "Filmes/Séries",
+        "universal"        : "Filmes/Séries",
+        "fox"              : "Filmes/Séries",
+        "fx"               : "Filmes/Séries",
+        "warner"           : "Filmes/Séries",
+        "canal sony"       : "Filmes/Séries",
+        "sony"             : "Filmes/Séries",
+        "syfy"             : "Filmes/Séries",
+        "tnt"              : "Filmes/Séries",
+        "axn"              : "Filmes/Séries",
+        "amc"              : "Filmes/Séries",
+        "a&e"              : "Filmes/Séries",
+        "tbs"              : "Filmes/Séries",
 
         "cartoon"        : "Infantis",
         "nick"           : "Infantis",
@@ -422,7 +424,8 @@ if __name__ == "__main__":
         links       = Crawler()
         threads     = []
         now         = datetime.datetime.now()
-        dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
+        dthr        = now.strftime("%d/%m/%Y %H:%M")
+        # dthr        = now.strftime("%d/%m/%Y %H:%M:%S")
         path        = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
         all         = [
             "https://bit.ly/faustinotv",
