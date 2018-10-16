@@ -89,7 +89,7 @@ class Crawler:
     def _threadParseList(self, link):
         print("Downloading list:", link)
         lines = self._getLinkLines(link)
-        if len(lines) > 3 * 1024 * 1024:
+        if len(lines) > 5 * 1024 * 1024:
             print("\t[\033[91mSIZE\033[0m]", link)
             return
         if lines:
@@ -251,6 +251,7 @@ if __name__ == "__main__":
         "russia",
         "uk",
         "fm",
+        "cartoonito",
         "internacion",
         "kosova",
         "clipes",
