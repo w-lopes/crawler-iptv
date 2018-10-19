@@ -282,7 +282,7 @@ if __name__ == "__main__":
         "cultura:",
         "nasa",
         "turk",
-        "espan",
+        "espa",
         "the air",
         "gospel",
         "pocc"
@@ -357,6 +357,9 @@ if __name__ == "__main__":
         "bis"            : "Variedades",
         "canal bis"      : "Variedades",
         "mais globosat"  : "Variedades",
+        "maisglobosat"   : "Variedades",
+        "+globosat"      : "Variedades",
+        "+ globosat"     : "Variedades",
         "canal brasil"   : "Variedades",
 
         "globo news"   : "Notícias",
