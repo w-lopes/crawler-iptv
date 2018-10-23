@@ -285,7 +285,8 @@ if __name__ == "__main__":
         "espa",
         "the air",
         "gospel",
-        "pocc"
+        "pocc",
+        "max tv"
     ]
     beg_with = {
         "fox sport"  : "Esportes",
