@@ -381,9 +381,9 @@ if __name__ == "__main__":
         "tv metropole" : "Abertos",
         "tv metrópole" : "Abertos",
         "central tv"   : "Abertos",
-        "tv jornal"    : "Abertos",
-        "tv diário"    : "Abertos",
-        "tv diario"    : "Abertos",
+        # "tv jornal"    : "Abertos",
+        # "tv diário"    : "Abertos",
+        # "tv diario"    : "Abertos",
 
         "bbb"         : "PPV",
         "big brother" : "PPV",
