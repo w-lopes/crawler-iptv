@@ -151,7 +151,7 @@ class Crawler:
             print("\t[\033[91mOFF\033[0m] (Timeout)", name)
             return
 
-        if ".m3u" not in url and ".ts" not in url:
+        if ".m3u" not in url and ".ts" not in url and "bit.ly" not in url:
             return
 
         if status > 400:
