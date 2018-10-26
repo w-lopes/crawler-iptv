@@ -246,7 +246,6 @@ if __name__ == "__main__":
         "mtv rocks",
         "mtv dance",
         "mtv live",
-        "mtv hits",
         "japan",
         "russia",
         "uk",
@@ -363,6 +362,8 @@ if __name__ == "__main__":
         "+globosat"      : "Variedades",
         "+ globosat"     : "Variedades",
         "canal brasil"   : "Variedades",
+        "mix tv"         : "Variedades",
+        "play tv"        : "Variedades",
 
         "globo news"   : "Notícias",
         "band news"    : "Notícias",
