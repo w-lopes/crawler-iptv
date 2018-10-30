@@ -111,7 +111,7 @@ class Crawler:
 
         name  = name if len(name) and "#" not in name else re.sub(".*,", "", line).strip()
         group = ""
-        name  = re.sub("(\(.*)|(\[.*)", "", name.replace("*", "")).strip()
+        name  = re.sub("(\(.*)|(\[.*)|(\s\s.*)", "", name.replace("*", "")).strip()
 
         if "minhalista" in logo:
             logo = "https://78.media.tumblr.com/avatar_98bf3185c980_128.pnj"
@@ -286,7 +286,9 @@ if __name__ == "__main__":
         "gospel",
         "pocc",
         "max tv",
-        "band of"
+        "band of",
+        "vivam",
+        "viva na"
     ]
     beg_with = {
         "fox sport"  : "Esportes",
